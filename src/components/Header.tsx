@@ -1,5 +1,7 @@
 // src/components/Header.tsx
-import Link from 'next/link';
+"use client";
+
+import Link from "next/link";
 
 export default function Header() {
   return (
@@ -18,17 +20,26 @@ export default function Header() {
           <Link href="/experts" className="text-zinc-700 hover:text-zinc-900">
             専門家を探す
           </Link>
-          <Link href="/inbox" className="text-zinc-700 hover:text-zinc-900">
-            受信箱
+
+          {/* 利用者マイページ */}
+          <Link href="/mypage" className="text-zinc-700 hover:text-zinc-900">
+            マイページ
           </Link>
-          <Link href="/session" className="text-zinc-700 hover:text-zinc-900">
-            セッション作成
-          </Link>
+
+          {/* ダッシュボード（従来どおり） */}
           <Link
             href="/dashboard"
             className="rounded-lg border border-zinc-200 px-3 py-1.5 text-zinc-700 hover:bg-zinc-50"
           >
             ダッシュボード
+          </Link>
+
+          {/* プロ用マイページ：一番右端に“ボタン”で強調 */}
+          <Link
+            href="/pro/mypage"
+            className="rounded-lg bg-indigo-600 px-3 py-1.5 font-medium text-white hover:bg-indigo-700"
+          >
+            プロ用マイページ
           </Link>
         </nav>
       </div>

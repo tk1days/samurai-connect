@@ -4,7 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ExpertCard from "@/components/ExpertCard";
-import { EXPERTS } from "@/data/experts";
+import { EXPERTS, type Expert } from "@/data/experts";
 
 type SortKey =
   | "default"
@@ -21,7 +21,7 @@ const SUGGESTS = [
   "葬儀", "終活", "ビザ", "会社設立", "中小企業",
 ];
 
-// 料金の数値部分だけ抽出（"30分/¥5,000" → 5000）
+// "30分/¥5,000" → 5000
 function parsePriceToYen(p?: string) {
   if (!p) return Number.POSITIVE_INFINITY;
   const m = p.replaceAll(",", "").match(/¥?\s*(\d+)/);
@@ -32,23 +32,19 @@ export default function ExpertsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // URLの ?q= を初期値に採用（ホームの検索から遷移してきた時に反映）
   const [q, setQ] = useState(() => searchParams.get("q") ?? "");
   const [sort, setSort] = useState<SortKey>("default");
-
-  // --- ページネーション ---
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
 
-  // URLの?q= が外部遷移で変わったら入力にも反映（戻る/進むなど）
+  // URL ?q= → 入力に同期
   useEffect(() => {
     const s = searchParams.get("q") ?? "";
-    // 無限ループ防止のため差分がある時だけ反映
     if (s !== q) setQ(s);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // 入力が変わったらURLの ?q= を置き換え（ページリロードなし）
+  // 入力 → URL ?q= に反映
   useEffect(() => {
     const sp = new URLSearchParams(searchParams.toString());
     if (q) sp.set("q", q);
@@ -57,16 +53,22 @@ export default function ExpertsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q]);
 
-  // 検索語や並び替え・表示件数が変わったら 1ページ目へ
+  // 条件変更で1ページ目へ
   useEffect(() => setPage(1), [q, sort, pageSize]);
 
   // フィルタ & ソート
-  const filtered = useMemo(() => {
+  const filtered: Expert[] = useMemo(() => {
     const k = q.trim().toLowerCase();
 
     const base = EXPERTS.filter((e) => {
       if (!k) return true;
-      const hay = [e.name, e.title, e.license ?? "", ...e.tags]
+      const hay = [
+        e.name,
+        e.title,
+        e.license ?? "",
+        ...(e.tags ?? []),
+        e.location,           // ★所在地も検索対象
+      ]
         .join(" ")
         .toLowerCase();
       return hay.includes(k);
@@ -91,7 +93,7 @@ export default function ExpertsPage() {
         break;
       case "default":
       default:
-        // デフォルトは「軽いおすすめ」：オンライン優先 → 評価 → レビュー
+        // オンライン優先 → 評価 → レビュー
         arr.sort(
           (a, b) =>
             Number(b.online) - Number(a.online) ||
@@ -122,7 +124,7 @@ export default function ExpertsPage() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className="w-full rounded-lg border px-4 py-2"
-            placeholder="キーワードで絞り込み（資格名でも検索可）"
+            placeholder="キーワード（名前 / 資格 / タグ / 所在地）"
           />
           {q && (
             <button
@@ -240,3 +242,4 @@ export default function ExpertsPage() {
     </main>
   );
 }
+

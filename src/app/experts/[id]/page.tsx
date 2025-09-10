@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { use, useMemo, useState } from "react";
-import { EXPERTS } from "@/data/experts";
+import { EXPERTS, type Expert } from "@/data/experts";
 
 /** params が Promise/非Promise どちらでも安全に取り出す */
 function getIdFromParams(params: { id: string } | Promise<{ id: string }>): string {
@@ -123,6 +123,21 @@ export default function ExpertDetailPage(p: PageProps) {
       ? "bg-gradient-to-b from-rose-50 to-white border-rose-100 ring-rose-100/70"
       : "bg-gradient-to-b from-sky-50 to-white border-sky-100 ring-sky-100/70";
 
+  // ボード解決（存在しない時は空配列）
+  const boardMembers = useMemo(() => {
+    const ids = (expert.boardMembers ?? []).filter(Boolean);
+    return ids
+      .map((x) => EXPERTS.find((e) => e.id === x))
+      .filter(Boolean) as Expert[];
+  }, [expert]);
+
+  const joinedBoards = useMemo(() => {
+    const ids = (expert.joinedBoards ?? []).filter(Boolean);
+    return ids
+      .map((x) => EXPERTS.find((e) => e.id === x))
+      .filter(Boolean) as Expert[];
+  }, [expert]);
+
   const reviews: Review[] = useMemo(
     () => PRESET_REVIEWS[expert.id] ?? makeFallbackReviews(expert.id, expert.rating ?? 4.6),
     [expert.id, expert.rating]
@@ -174,6 +189,9 @@ export default function ExpertDetailPage(p: PageProps) {
 
                 <p className="mt-1 text-gray-700">{expert.title}</p>
 
+                {/* 所在地 */}
+                <p className="mt-1 text-sm font-medium text-gray-900">所在地：{expert.location}</p>
+
                 <div className="mt-2 flex items-center gap-2 text-sm text-gray-700">
                   <Stars value={safeRating} />
                   <span>{safeRating.toFixed(1)}</span>
@@ -203,6 +221,70 @@ export default function ExpertDetailPage(p: PageProps) {
               <p className="mt-2 whitespace-pre-wrap text-gray-800 leading-relaxed">
                 {expert.bio}
               </p>
+            </section>
+
+            {/* ===== ボード領域 =====
+               ・左カード：専門家ボード（しっかり表示）
+               ・右カード：参加しているボード（控えめ表示）
+               ・データが無いときも “ブランク” のカードを表示して高さを維持
+            */}
+            <div className="my-6 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+            <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* 専門家ボード：しっかり表示（アバター+名前、グリッド） */}
+              <div className="rounded-2xl border border-gray-200 bg-white/95 p-5 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-semibold">専門家ボード</h3>
+                  {/* 将来：編集導線 */}
+                </div>
+                {boardMembers.length > 0 ? (
+                  <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {boardMembers.map((m) => (
+                      <Link
+                        key={m.id}
+                        href={`/experts/${m.id}`}
+                        className="group flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 hover:bg-gray-100"
+                        title={m.name}
+                      >
+                        <span
+                          className={`h-7 w-7 shrink-0 rounded-full bg-gradient-to-br ${
+                            m.gender === "female"
+                              ? "from-pink-400 to-rose-500"
+                              : "from-sky-500 to-indigo-500"
+                          }`}
+                        />
+                        <span className="text-sm font-medium text-gray-900 line-clamp-1">
+                          {m.name}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  // ブランク：高さだけ確保（装飾なし）
+                  <div className="mt-3 min-h-20" />
+                )}
+              </div>
+
+              {/* 参加しているボード：控えめ（小さめのリンクリスト） */}
+              <div className="rounded-2xl border border-gray-200 bg-white/95 p-5 shadow-sm">
+                <h3 className="text-base font-semibold">参加しているボード</h3>
+                {joinedBoards.length > 0 ? (
+                  <ul className="mt-3 space-y-2">
+                    {joinedBoards.map((o) => (
+                      <li key={o.id}>
+                        <Link
+                          href={`/experts/${o.id}`}
+                          className="text-sm text-indigo-700 underline underline-offset-4 hover:text-indigo-900"
+                        >
+                          {o.name} のボード
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  // ブランク：高さだけ確保（装飾なし）
+                  <div className="mt-3 min-h-20" />
+                )}
+              </div>
             </section>
 
             {/* レビュー一覧 */}
@@ -303,3 +385,4 @@ export default function ExpertDetailPage(p: PageProps) {
     </main>
   );
 }
+

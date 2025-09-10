@@ -1,6 +1,8 @@
+// src/app/inbox/page.tsx
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
+import { EXPERTS } from '@/data/experts';
 
 /** ========= Types ========= */
 type RequestStatus = 'pending' | 'accepted' | 'declined' | 'expired';
@@ -16,7 +18,13 @@ type InboxItem = {
   unread: boolean;
 };
 
-/** ========= Mock Data ========= */
+/** ========= Channels / Keys ========= */
+const BC_NAME = 'sc-inbox';                      // /session からの通知チャンネル
+const LS_ITEMS = 'sc_inbox_items_v1';            // 受信箱の永続化
+const LS_NEWBUF = 'sc_inbox_new';                // /session 側のバッファ（初回取込用）
+const LS_UNREAD_COUNT = 'inbox-unread-count';    // ヘッダー用の未読数
+
+/** ========= Mock ========= */
 const NOW = Date.now();
 const minutesFromNow = (m: number) => new Date(NOW + m * 60_000).toISOString();
 
@@ -123,12 +131,47 @@ function Countdown({ expiresAt }: { expiresAt: string }) {
 
 /** ========= Page ========= */
 export default function InboxPage() {
-  const [items, setItems] = useState<InboxItem[]>(MOCK_INBOX);
+  const [items, setItems] = useState<InboxItem[]>([]);
   const [q, setQ] = useState('');
   const [tab, setTab] = useState<'all' | 'unread' | RequestStatus>('all');
   const [sortKey, setSortKey] = useState<'created' | 'expires'>('created');
 
-  // pendingの期限切れを自動反映
+  /** 初回：localStorage から復元（無ければモック）＋ NEW バッファ取り込み */
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(LS_ITEMS);
+      const parsed: InboxItem[] | null = raw ? JSON.parse(raw) : null;
+      const base = Array.isArray(parsed) && parsed.length > 0 ? parsed : MOCK_INBOX;
+
+      // /session 側で溜めた新着（LS_NEWBUF）を取り込み
+      const bufRaw = localStorage.getItem(LS_NEWBUF);
+      if (bufRaw) {
+        const buf: any[] = JSON.parse(bufRaw);
+        const merged = [...buf, ...base].map(toInboxItem);
+        setItems(dedupe(merged));
+        localStorage.removeItem(LS_NEWBUF);
+      } else {
+        setItems(base);
+      }
+    } catch {
+      setItems(MOCK_INBOX);
+    }
+  }, []);
+
+  /** BroadcastChannel 受信（/session → /inbox 即時反映） */
+  useEffect(() => {
+    if (typeof window === 'undefined' || !('BroadcastChannel' in window)) return;
+    const ch = new BroadcastChannel(BC_NAME);
+    const onMsg = (ev: MessageEvent) => {
+      const msg = ev.data;
+      if (!msg || msg.type !== 'add') return;
+      setItems(prev => dedupe([toInboxItem(msg), ...prev]));
+    };
+    ch.addEventListener('message', onMsg);
+    return () => ch.close();
+  }, []);
+
+  /** pending の期限切れを自動反映（5秒おき） */
   useEffect(() => {
     const id = setInterval(() => {
       setItems(prev =>
@@ -142,15 +185,24 @@ export default function InboxPage() {
     return () => clearInterval(id);
   }, []);
 
+  /** 変更のたび永続化＆未読件数の保存＋イベント通知 */
+  const unreadCount = useMemo(() => items.filter(x => x.unread).length, [items]);
+  useEffect(() => {
+    try {
+      localStorage.setItem(LS_ITEMS, JSON.stringify(items));
+      localStorage.setItem(LS_UNREAD_COUNT, String(unreadCount));
+    } catch {}
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('inbox:unread', { detail: unreadCount }));
+    }
+  }, [items, unreadCount]);
+
+  /** フィルタ＆ソート */
   const filtered = useMemo(() => {
     const k = q.trim();
     let list = items.filter(x => {
-      const hit =
-        x.requesterName.includes(k) ||
-        x.topic.includes(k) ||
-        (x.note ?? '').includes(k) ||
-        x.id.includes(k);
-      return k ? hit : true;
+      const hay = `${x.requesterName} ${x.topic} ${x.note ?? ''} ${x.id}`;
+      return k ? hay.includes(k) : true;
     });
     if (tab === 'unread') list = list.filter(x => x.unread);
     else if (tab !== 'all') list = list.filter(x => x.status === tab);
@@ -164,6 +216,7 @@ export default function InboxPage() {
     return list;
   }, [items, q, tab, sortKey]);
 
+  /** アクション */
   const onAccept = (id: string) =>
     setItems(prev => prev.map(x => (x.id === id ? { ...x, status: 'accepted', unread: false } : x)));
   const onDecline = (id: string) =>
@@ -305,4 +358,39 @@ export default function InboxPage() {
       </section>
     </main>
   );
+}
+
+/** ========= Convert & Utils ========= */
+function toInboxItem(payload: any): InboxItem {
+  // /session の Invite 形 { id, expertId, clientName, topic, createdAt, ttlSec, unread, note }
+  if (payload && payload.expertId) {
+    const exp = EXPERTS.find(e => e.id === payload.expertId);
+    const expertName = exp ? `${exp.name}（${exp.license ?? '資格なし'}）` : '不明な専門家';
+    const createdMs = Number(payload.createdAt) || Date.now();
+    const ttlSec = Math.max(30, Math.min(600, Number(payload.ttlSec) || 180));
+    return {
+      id: String(payload.id),
+      requesterName: String(payload.clientName || '匿名ユーザー'),
+      topic: String(payload.topic || '相談があります'),
+      note: payload.note ? String(payload.note) : undefined,
+      expertName,
+      createdAt: new Date(createdMs).toISOString(),
+      expiresAt: new Date(createdMs + ttlSec * 1000).toISOString(),
+      status: 'pending',
+      unread: true,
+    };
+  }
+  // 既に InboxItem ならそのまま
+  return payload as InboxItem;
+}
+
+function dedupe(arr: InboxItem[]): InboxItem[] {
+  const seen = new Set<string>();
+  const out: InboxItem[] = [];
+  for (const x of arr) {
+    if (seen.has(x.id)) continue;
+    seen.add(x.id);
+    out.push(x);
+  }
+  return out;
 }

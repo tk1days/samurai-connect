@@ -1,4 +1,12 @@
 // src/data/experts.ts
+export type Gender = "male" | "female";
+
+/**
+ * Expert データ型
+ * - location（所在地）を追加
+ * - boardMembers: 自分のボードに載せている相手
+ * - joinedBoards: 参加しているボード（オーナーID）
+ */
 export type Expert = {
   id: string;
   name: string;
@@ -9,8 +17,12 @@ export type Expert = {
   online: boolean;
   rating: number;
   reviews: number;
-  gender: "male" | "female";
+  gender: Gender;
   bio: string;
+
+  location: string;         // 追加: 所在地
+  boardMembers?: string[];  // 追加: 自分のボードに載せている相手ID
+  joinedBoards?: string[];  // 追加: 参加しているボード（オーナーID）
 };
 
 export const EXPERTS: Expert[] = [
@@ -26,6 +38,8 @@ export const EXPERTS: Expert[] = [
     reviews: 132,
     gender: "male",
     bio: "中小企業向けの法人税務を中心に活動。節税や資金繰り改善のアドバイスが得意です。",
+    location: "東京都 千代田区",
+    boardMembers: ["11"],
   },
   {
     id: "2",
@@ -39,6 +53,8 @@ export const EXPERTS: Expert[] = [
     reviews: 89,
     gender: "female",
     bio: "就業規則の整備や労務トラブルの予防に注力。助成金申請のサポート経験も豊富です。",
+    location: "大阪府 大阪市",
+    joinedBoards: ["1"],
   },
   {
     id: "3",
@@ -52,6 +68,7 @@ export const EXPERTS: Expert[] = [
     reviews: 76,
     gender: "male",
     bio: "会社設立や相続登記を中心にサポート。初めての手続きでも分かりやすく説明します。",
+    location: "愛知県 名古屋市",
   },
   {
     id: "4",
@@ -65,6 +82,7 @@ export const EXPERTS: Expert[] = [
     reviews: 54,
     gender: "female",
     bio: "許認可申請や各種契約書の作成・チェックを迅速に対応します。",
+    location: "福岡県 福岡市",
   },
   {
     id: "5",
@@ -78,6 +96,7 @@ export const EXPERTS: Expert[] = [
     reviews: 210,
     gender: "male",
     bio: "企業法務全般を担当。労務問題の初動対応・交渉が強みです。",
+    location: "神奈川県 横浜市",
   },
   {
     id: "6",
@@ -91,6 +110,8 @@ export const EXPERTS: Expert[] = [
     reviews: 65,
     gender: "female",
     bio: "IPO準備・内部統制の整備運用を支援。監査対応の実務経験が豊富です。",
+    location: "京都府 京都市",
+    boardMembers: ["1"],
   },
   {
     id: "7",
@@ -104,6 +125,7 @@ export const EXPERTS: Expert[] = [
     reviews: 33,
     gender: "male",
     bio: "スタートアップの知財戦略を支援。短時間での方針整理が好評です。",
+    location: "北海道 札幌市",
   },
   {
     id: "8",
@@ -117,6 +139,7 @@ export const EXPERTS: Expert[] = [
     reviews: 97,
     gender: "female",
     bio: "資産承継や事業承継の設計を中心に、わかりやすさを大切にしています。",
+    location: "兵庫県 神戸市",
   },
   {
     id: "9",
@@ -130,6 +153,7 @@ export const EXPERTS: Expert[] = [
     reviews: 41,
     gender: "male",
     bio: "給与計算や年末調整の実務経験豊富。効率的で正確な処理を心がけています。",
+    location: "千葉県 千葉市",
   },
   {
     id: "10",
@@ -143,6 +167,7 @@ export const EXPERTS: Expert[] = [
     reviews: 22,
     gender: "female",
     bio: "地域密着で葬儀や終活相談をサポート。安心してご相談いただけます。",
+    location: "埼玉県 さいたま市",
   },
   {
     id: "11",
@@ -156,5 +181,7 @@ export const EXPERTS: Expert[] = [
     reviews: 58,
     gender: "male",
     bio: "将来設計や資産運用をわかりやすく提案。保険や投資もトータルに相談可能です。",
+    location: "東京都 渋谷区",
+    joinedBoards: ["1"],
   },
 ];

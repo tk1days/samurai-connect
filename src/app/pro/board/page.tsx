@@ -1,4 +1,4 @@
-// src/app/pro/board/page.tsx
+// /src/app/pro/board/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -15,10 +15,7 @@ const LS_KEY = (id: string) => `sc_pro_board_${id}`;
 
 export default function ProBoardPage() {
   // --- ベース専門家（自分） ---
-  const me = useMemo(
-    () => EXPERTS.find((e) => e.id === MOCK_EXPERT_ID),
-    []
-  );
+  const me = useMemo(() => EXPERTS.find((e) => e.id === MOCK_EXPERT_ID), []);
 
   // --- メンバーID配列（保存対象） ---
   const [memberIds, setMemberIds] = useState<string[]>([]);
@@ -69,13 +66,7 @@ export default function ProBoardPage() {
       if (e.id === MOCK_EXPERT_ID) return false;
       if (memberIds.includes(e.id)) return false;
       if (!k) return true;
-      const hay = [
-        e.name,
-        e.title,
-        e.license ?? "",
-        e.location ?? "",
-        ...(e.tags ?? []),
-      ]
+      const hay = [e.name, e.title, e.license ?? "", e.location ?? "", ...(e.tags ?? [])]
         .join(" ")
         .toLowerCase();
       return hay.includes(k);
@@ -104,13 +95,13 @@ export default function ProBoardPage() {
   const clearAll = () => setMemberIds([]);
 
   if (!loaded) {
-    return <div className="p-6 text-sm text-zinc-600">読み込み中…</div>;
+    return <div className="sc-container py-8 text-sm text-subtle">読み込み中…</div>;
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
+    <main className="sc-container py-8 space-y-8">
       {/* パンくず */}
-      <div className="text-sm text-zinc-600">
+      <div className="text-sm text-subtle">
         <Link href="/pro/mypage" className="underline">プロ用マイページ</Link>
         <span className="mx-1">/</span>
         専門家ボード
@@ -118,27 +109,29 @@ export default function ProBoardPage() {
 
       {/* 見出し */}
       <header className="border-b pb-4">
-        <h1 className="text-2xl font-bold">専門家ボード</h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          あなたのボードに表示する専門家を管理します（保存先：ブラウザの <code className="rounded bg-zinc-100 px-1">localStorage</code>）。
+        <h1>専門家ボード</h1>
+        <p className="mt-1 text-sm text-subtle">
+          あなたのボードに表示する専門家を管理します（保存先：ブラウザの{" "}
+          <code className="rounded bg-zinc-100 px-1">localStorage</code>）。
         </p>
       </header>
 
       {/* 現在のボード（しっかり表示） */}
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <section className="card p-5">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">現在のボード</h2>
           <div className="flex items-center gap-2">
             <Link
               href={`/experts/${MOCK_EXPERT_ID}`}
-              className="text-sm text-indigo-700 underline underline-offset-4 hover:text-indigo-900"
+              className="text-sm underline"
+              title="公開プロフィールを確認"
             >
               公開プロフィールを確認
             </Link>
             {members.length > 0 && (
               <button
                 onClick={clearAll}
-                className="rounded-lg border px-3 py-1.5 text-xs hover:bg-zinc-50"
+                className="btn btn-outline text-xs"
               >
                 すべて外す
               </button>
@@ -147,29 +140,32 @@ export default function ProBoardPage() {
         </div>
 
         {members.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-8 text-center text-zinc-500">
+          <div className="card-soft border-dashed p-8 text-center text-subtle">
             まだボードに登録されていません。下の「候補から追加」から追加してください。
           </div>
         ) : (
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {members.map((m, idx) => (
-              <li key={m.id} className="rounded-xl border p-4">
+              <li key={m.id} className="card-soft p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-xs text-zinc-500">{m.license ?? "（資格なし）"}</div>
+                    <div className="text-xs text-subtle">{m.license ?? "（資格なし）"}</div>
                     <Link
                       href={`/experts/${m.id}`}
-                      className="block truncate text-base font-semibold hover:underline"
+                      className="block truncate text-base font-semibold underline-offset-4 hover:underline"
                       title={m.name}
                     >
                       {m.name}
                     </Link>
-                    <div className="truncate text-sm text-zinc-700">{m.title}</div>
-                    <div className="mt-1 text-xs text-zinc-600">所在地：{m.location}</div>
+                    <div className="truncate text-sm">{m.title}</div>
+                    <div className="mt-1 text-xs text-muted">所在地：{m.location}</div>
                     {m.tags?.length ? (
                       <div className="mt-2 flex flex-wrap gap-1">
                         {m.tags.slice(0, 4).map((t) => (
-                          <span key={`${m.id}-${t}`} className="rounded-full border bg-zinc-50 px-2 py-0.5 text-[11px]">
+                          <span
+                            key={`${m.id}-${t}`}
+                            className="badge-muted text-[11px]"
+                          >
                             {t}
                           </span>
                         ))}
@@ -180,7 +176,7 @@ export default function ProBoardPage() {
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     <button
                       onClick={() => remove(m.id)}
-                      className="rounded-lg border px-2 py-1 text-xs hover:bg-zinc-50"
+                      className="btn btn-outline px-2 py-1 text-xs"
                       title="ボードから外す"
                     >
                       外す
@@ -188,7 +184,7 @@ export default function ProBoardPage() {
                     <div className="flex gap-1">
                       <button
                         onClick={() => moveUp(idx)}
-                        className="rounded-md border px-2 py-1 text-xs hover:bg-zinc-50"
+                        className="btn btn-outline px-2 py-1 text-xs"
                         disabled={idx === 0}
                         title="上へ"
                       >
@@ -196,7 +192,7 @@ export default function ProBoardPage() {
                       </button>
                       <button
                         onClick={() => moveDown(idx)}
-                        className="rounded-md border px-2 py-1 text-xs hover:bg-zinc-50"
+                        className="btn btn-outline px-2 py-1 text-xs"
                         disabled={idx === members.length - 1}
                         title="下へ"
                       >
@@ -212,19 +208,19 @@ export default function ProBoardPage() {
       </section>
 
       {/* 追加：候補から探す（控えめに） */}
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <section className="card p-5">
         <h2 className="text-lg font-semibold">候補から追加</h2>
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className="w-full rounded-lg border px-4 py-2"
+            className="input"
             placeholder="キーワード（名前 / 資格 / タグ / 所在地）で検索"
           />
           {q && (
             <button
               onClick={() => setQ("")}
-              className="shrink-0 rounded-lg border px-3 py-2 text-sm hover:bg-zinc-50"
+              className="btn btn-outline text-sm"
             >
               クリア
             </button>
@@ -233,31 +229,32 @@ export default function ProBoardPage() {
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {candidates.length === 0 ? (
-            <div className="sm:col-span-2 lg:col-span-3 rounded-xl border border-dashed p-8 text-center text-zinc-500">
+            <div className="sm:col-span-2 lg:col-span-3 card-soft border-dashed p-8 text-center text-subtle">
               該当する候補がありません。
             </div>
           ) : (
             candidates.map((e) => (
-              <article key={e.id} className="rounded-xl border p-4">
+              <article key={e.id} className="card-soft p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <div className="text-xs text-zinc-500">{e.license ?? "（資格なし）"}</div>
+                      <div className="text-xs text-subtle">{e.license ?? "（資格なし）"}</div>
                       {e.online ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200">
-                          ● 待機中
-                        </span>
+                        <span className="badge text-[11px]">● 待機中</span>
                       ) : null}
                     </div>
-                    <Link href={`/experts/${e.id}`} className="block truncate text-base font-semibold hover:underline">
+                    <Link
+                      href={`/experts/${e.id}`}
+                      className="block truncate text-base font-semibold underline-offset-4 hover:underline"
+                    >
                       {e.name}
                     </Link>
-                    <div className="truncate text-sm text-zinc-700">{e.title}</div>
-                    <div className="mt-1 text-xs text-zinc-600">所在地：{e.location}</div>
+                    <div className="truncate text-sm">{e.title}</div>
+                    <div className="mt-1 text-xs text-muted">所在地：{e.location}</div>
                   </div>
                   <button
                     onClick={() => add(e.id)}
-                    className="shrink-0 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+                    className="btn btn-primary text-xs"
                   >
                     追加
                   </button>
@@ -270,7 +267,7 @@ export default function ProBoardPage() {
 
       {/* 戻る導線 */}
       <div className="flex items-center gap-2">
-        <Link href="/pro/mypage" className="rounded-lg border px-4 py-2 hover:bg-zinc-50">
+        <Link href="/pro/mypage" className="btn btn-outline">
           プロ用マイページへ戻る
         </Link>
       </div>

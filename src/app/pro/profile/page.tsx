@@ -1,4 +1,4 @@
-// src/app/pro/profile/page.tsx
+// /src/app/pro/profile/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -25,7 +25,7 @@ type Form = {
 };
 
 export default function ProProfilePage() {
-  // 既存データ（モック）：まず既存EXPERTから初期値を作る
+  // 既存データ（モック）：まず既存 EXPERT から初期値を作る
   const base = useMemo(() => {
     const e = EXPERTS.find((x) => x.id === MOCK_EXPERT_ID);
     return e
@@ -74,7 +74,7 @@ export default function ProProfilePage() {
     try {
       localStorage.setItem(LS_KEY(MOCK_EXPERT_ID), JSON.stringify(form));
       alert("プロフィールを保存しました（ローカル保存：モック）");
-    } catch (e) {
+    } catch {
       alert("保存に失敗しました");
     }
   };
@@ -84,103 +84,104 @@ export default function ProProfilePage() {
     setForm((prev) => ({ ...prev, [k]: v }));
 
   if (!loaded) {
-    return <div className="p-6 text-sm text-gray-600">読み込み中…</div>;
+    return <div className="sc-container py-6 text-sm text-subtle">読み込み中…</div>;
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-4 text-sm text-zinc-600">
-        <Link href="/pro/mypage" className="underline">
-          プロ用マイページ
-        </Link>
-        <span className="mx-1">/</span>
+    <main className="sc-container py-8 space-y-6">
+      {/* パンくず */}
+      <div className="text-sm text-muted">
+        <Link href="/pro/mypage" className="underline">プロ用マイページ</Link>
+        <span className="mx-1 text-subtle">/</span>
         プロフィール編集
       </div>
 
-      <h1 className="text-2xl font-bold">プロフィール編集</h1>
-      <p className="mt-1 text-zinc-600">
-        表示名・肩書・自己紹介・所在地などを編集します（保存先：ブラウザの
-        <code className="mx-1 rounded bg-zinc-100 px-1">localStorage</code>）。
-      </p>
+      {/* ヘッダー */}
+      <header>
+        <h1>プロフィール編集</h1>
+        <p className="mt-1 text-subtle">
+          表示名・肩書・自己紹介・所在地などを編集します（保存先：ブラウザの
+          <code className="mx-1 rounded bg-zinc-100 px-1">localStorage</code>）。
+        </p>
+      </header>
 
-      <div className="mt-6 grid gap-4 rounded-2xl border bg-white p-5 shadow-sm">
+      {/* フォームカード */}
+      <section className="card p-5 grid gap-4">
         {/* 表示名 */}
         <div>
-          <label className="text-sm text-zinc-700">表示名</label>
+          <label className="text-sm text-muted">表示名</label>
           <input
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="input mt-1"
             placeholder="例）山田 太郎"
           />
         </div>
 
         {/* 資格 */}
         <div>
-          <label className="text-sm text-zinc-700">資格（任意）</label>
+          <label className="text-sm text-muted">資格（任意）</label>
           <input
             value={form.license ?? ""}
             onChange={(e) => set("license", e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="input mt-1"
             placeholder="例）税理士（無資格の場合は空欄）"
           />
         </div>
 
         {/* 肩書 */}
         <div>
-          <label className="text-sm text-zinc-700">肩書 / 提供メニュー</label>
+          <label className="text-sm text-muted">肩書 / 提供メニュー</label>
           <input
             value={form.title}
             onChange={(e) => set("title", e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="input mt-1"
             placeholder="例）法人税・決算相談"
           />
         </div>
 
         {/* 所在地 */}
         <div>
-          <label className="text-sm text-zinc-700">所在地</label>
+          <label className="text-sm text-muted">所在地</label>
           <input
             value={form.location}
             onChange={(e) => set("location", e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="input mt-1"
             placeholder="例）東京都 千代田区"
           />
         </div>
 
         {/* 料金表示（目安） */}
         <div>
-          <label className="text-sm text-zinc-700">料金（表示用）</label>
+          <label className="text-sm text-muted">料金（表示用）</label>
           <input
             value={form.price}
             onChange={(e) => set("price", e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="input mt-1"
             placeholder="例）30分/¥5,000"
           />
         </div>
 
         {/* タグ */}
         <div>
-          <label className="text-sm text-zinc-700">タグ（カンマ区切り）</label>
+          <label className="text-sm text-muted">タグ（カンマ区切り）</label>
           <input
             value={form.tagsCsv}
             onChange={(e) => set("tagsCsv", e.target.value)}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="input mt-1"
             placeholder="例）法人税,節税,中小企業"
           />
-          <p className="mt-1 text-xs text-zinc-500">
-            一覧・詳細ページの検索や表示で使用します。
-          </p>
+          <p className="mt-1 text-xs text-subtle">一覧・詳細ページの検索や表示で使用します。</p>
         </div>
 
         {/* 自己紹介 */}
         <div>
-          <label className="text-sm text-zinc-700">自己紹介</label>
+          <label className="text-sm text-muted">自己紹介</label>
           <textarea
             value={form.bio}
             onChange={(e) => set("bio", e.target.value)}
             rows={5}
-            className="mt-1 w-full rounded-lg border px-3 py-2"
+            className="textarea mt-1"
             placeholder="経歴や得意分野、相談スタイルなどを記載してください。"
           />
         </div>
@@ -194,31 +195,26 @@ export default function ProProfilePage() {
             onChange={(e) => set("online", e.target.checked)}
             className="h-4 w-4"
           />
-          <label htmlFor="online" className="text-sm text-zinc-700">
+          <label htmlFor="online" className="text-sm text-muted">
             オンライン待機中として表示する（一覧で優先表示）
           </label>
         </div>
 
-        {/* 保存操作 */}
-        <div className="mt-2 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={save}
-            className="rounded-lg bg-black px-4 py-2 text-white hover:bg-zinc-900"
-          >
+        <div className="divider" />
+
+        {/* 操作 */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button type="button" onClick={save} className="btn btn-primary">
             保存する
           </button>
 
-          <Link
-            href="/pro/mypage"
-            className="rounded-lg border px-4 py-2 hover:bg-zinc-50"
-          >
+          <Link href="/pro/mypage" className="btn btn-outline">
             プロ用マイページに戻る
           </Link>
 
           <Link
             href={`/experts/${MOCK_EXPERT_ID}`}
-            className="text-sm text-indigo-700 underline underline-offset-4 hover:text-indigo-900"
+            className="text-sm underline"
             title="公開プロフィール（モック）を確認"
           >
             公開プロフィールを確認
@@ -226,10 +222,10 @@ export default function ProProfilePage() {
         </div>
 
         {/* 注意 */}
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-subtle">
           ※ 現在はモック版です。保存内容はブラウザ内にのみ保持されます。実データ反映（/src/data/experts.ts など）は次段階で接続します。
         </p>
-      </div>
+      </section>
     </main>
   );
 }

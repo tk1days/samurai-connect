@@ -1,4 +1,4 @@
-// src/app/pro/billing/page.tsx
+// /src/app/pro/billing/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -133,66 +133,66 @@ export default function ProBillingPage() {
 
   /** ===== Render ===== */
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
+    <main className="sc-container py-8 space-y-8">
       {/* Header */}
       <header className="border-b pb-4">
-        <h1 className="text-2xl font-bold">決済情報</h1>
-        <p className="mt-1 text-sm text-zinc-600">
+        <h1>決済情報</h1>
+        <p className="mt-1 text-sm text-subtle">
           受け取り口座・請求情報・取引履歴を管理します。{" "}
           <Link href="/pro/mypage" className="underline">プロ用マイページへ戻る</Link>
         </p>
       </header>
 
       {/* Summary */}
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <section className="card p-5">
         <h2 className="text-lg font-semibold">サマリー</h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border p-4">
-            <div className="text-xs text-zinc-500">総売上（支払い済）</div>
+          <div className="card-soft p-4">
+            <div className="text-xs text-subtle">総売上（支払い済）</div>
             <div className="mt-1 text-xl font-bold tabular-nums">¥{totals.gross.toLocaleString()}</div>
           </div>
-          <div className="rounded-xl border p-4">
-            <div className="text-xs text-zinc-500">手数料累計</div>
+          <div className="card-soft p-4">
+            <div className="text-xs text-subtle">手数料累計</div>
             <div className="mt-1 text-xl font-bold tabular-nums">¥{totals.fee.toLocaleString()}</div>
           </div>
-          <div className="rounded-xl border p-4">
-            <div className="text-xs text-zinc-500">振込予定額</div>
+          <div className="card-soft p-4">
+            <div className="text-xs text-subtle">振込予定額</div>
             <div className="mt-1 text-xl font-bold tabular-nums">¥{totals.net.toLocaleString()}</div>
           </div>
         </div>
       </section>
 
       {/* Payout */}
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <section className="card p-5">
         <h2 className="text-lg font-semibold">受け取り口座</h2>
-        <p className="mt-1 text-sm text-zinc-600">売上の振込先を登録・更新します。</p>
+        <p className="mt-1 text-sm text-subtle">売上の振込先を登録・更新します。</p>
 
         <form
           className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2"
           onSubmit={(e) => e.preventDefault()}
         >
           <div>
-            <label className="text-sm text-zinc-700">銀行名</label>
+            <label className="text-sm text-muted">銀行名</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={payout.bankName}
               onChange={(e) => setPayout({ ...payout, bankName: e.target.value })}
               placeholder="例：三井住友銀行"
             />
           </div>
           <div>
-            <label className="text-sm text-zinc-700">支店名</label>
+            <label className="text-sm text-muted">支店名</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={payout.branch}
               onChange={(e) => setPayout({ ...payout, branch: e.target.value })}
               placeholder="例：渋谷支店"
             />
           </div>
           <div>
-            <label className="text-sm text-zinc-700">口座種別</label>
+            <label className="text-sm text-muted">口座種別</label>
             <select
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="select mt-1"
               value={payout.accountType}
               onChange={(e) => setPayout({ ...payout, accountType: e.target.value as Payout["accountType"] })}
             >
@@ -201,18 +201,18 @@ export default function ProBillingPage() {
             </select>
           </div>
           <div>
-            <label className="text-sm text-zinc-700">口座番号</label>
+            <label className="text-sm text-muted">口座番号</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={payout.accountNumber}
               onChange={(e) => setPayout({ ...payout, accountNumber: e.target.value })}
               placeholder="7桁〜8桁"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="text-sm text-zinc-700">口座名義（カナ推奨）</label>
+            <label className="text-sm text-muted">口座名義（カナ推奨）</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={payout.accountHolder}
               onChange={(e) => setPayout({ ...payout, accountHolder: e.target.value })}
               placeholder="ヤマダ タロウ"
@@ -222,7 +222,7 @@ export default function ProBillingPage() {
           <div className="sm:col-span-2 mt-2">
             <button
               type="submit"
-              className="rounded-lg border px-4 py-2 text-sm hover:bg-zinc-50"
+              className="btn btn-outline text-sm"
               onClick={() => {}}
             >
               保存（自動）
@@ -232,69 +232,69 @@ export default function ProBillingPage() {
       </section>
 
       {/* Invoice */}
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <section className="card p-5">
         <h2 className="text-lg font-semibold">請求書情報</h2>
-        <p className="mt-1 text-sm text-zinc-600">請求書の宛名・住所・登録番号を管理します。</p>
+        <p className="mt-1 text-sm text-subtle">請求書の宛名・住所・登録番号を管理します。</p>
 
         <form className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2" onSubmit={(e) => e.preventDefault()}>
           <div className="sm:col-span-2">
-            <label className="text-sm text-zinc-700">会社名（任意）</label>
+            <label className="text-sm text-muted">会社名（任意）</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={invoice.company}
               onChange={(e) => setInvoice({ ...invoice, company: e.target.value })}
               placeholder="例：〇〇合同会社"
             />
           </div>
           <div>
-            <label className="text-sm text-zinc-700">担当者 / 氏名</label>
+            <label className="text-sm text-muted">担当者 / 氏名</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={invoice.person}
               onChange={(e) => setInvoice({ ...invoice, person: e.target.value })}
               placeholder="山田 太郎"
             />
           </div>
           <div>
-            <label className="text-sm text-zinc-700">郵便番号</label>
+            <label className="text-sm text-muted">郵便番号</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={invoice.postal}
               onChange={(e) => setInvoice({ ...invoice, postal: e.target.value })}
               placeholder="100-0001"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="text-sm text-zinc-700">住所1</label>
+            <label className="text-sm text-muted">住所1</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={invoice.address1}
               onChange={(e) => setInvoice({ ...invoice, address1: e.target.value })}
               placeholder="東京都千代田区〇〇1-2-3"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="text-sm text-zinc-700">住所2（任意）</label>
+            <label className="text-sm text-muted">住所2（任意）</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={invoice.address2}
               onChange={(e) => setInvoice({ ...invoice, address2: e.target.value })}
               placeholder="ビル名・部屋番号など"
             />
           </div>
           <div>
-            <label className="text-sm text-zinc-700">電話（任意）</label>
+            <label className="text-sm text-muted">電話（任意）</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={invoice.tel}
               onChange={(e) => setInvoice({ ...invoice, tel: e.target.value })}
               placeholder="03-1234-5678"
             />
           </div>
           <div>
-            <label className="text-sm text-zinc-700">登録番号（任意）</label>
+            <label className="text-sm text-muted">登録番号（任意）</label>
             <input
-              className="mt-1 w-full rounded-lg border px-3 py-2"
+              className="input mt-1"
               value={invoice.taxId}
               onChange={(e) => setInvoice({ ...invoice, taxId: e.target.value })}
               placeholder="T1234567890123（インボイスなど）"
@@ -304,7 +304,7 @@ export default function ProBillingPage() {
           <div className="sm:col-span-2 mt-2">
             <button
               type="submit"
-              className="rounded-lg border px-4 py-2 text-sm hover:bg-zinc-50"
+              className="btn btn-outline text-sm"
               onClick={() => {}}
             >
               保存（自動）
@@ -314,12 +314,12 @@ export default function ProBillingPage() {
       </section>
 
       {/* History */}
-      <section className="rounded-2xl border bg-white p-5 shadow-sm">
+      <section className="card p-5">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">取引履歴</h2>
           <button
             onClick={() => setHistory([])}
-            className="text-xs text-zinc-600 underline"
+            className="text-xs underline text-subtle"
             title="モックを消去"
           >
             すべてクリア
@@ -327,12 +327,12 @@ export default function ProBillingPage() {
         </div>
 
         {history.length === 0 ? (
-          <p className="text-sm text-zinc-500">まだ取引履歴がありません。</p>
+          <p className="text-sm text-subtle">まだ取引履歴がありません。</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b text-left text-zinc-600">
+                <tr className="border-b text-left text-muted">
                   <th className="py-2 pr-4">日時</th>
                   <th className="py-2 pr-4">依頼者</th>
                   <th className="py-2 pr-4">内容</th>
@@ -352,9 +352,9 @@ export default function ProBillingPage() {
                     <td className="py-2">
                       <span
                         className={{
-                          paid: "rounded-md bg-emerald-50 px-2 py-0.5 text-emerald-700 ring-1 ring-emerald-200",
-                          refunded: "rounded-md bg-amber-50 px-2 py-0.5 text-amber-700 ring-1 ring-amber-200",
-                          pending: "rounded-md bg-gray-50 px-2 py-0.5 text-gray-700 ring-1 ring-gray-300",
+                          paid: "badge",
+                          refunded: "badge-muted",
+                          pending: "badge-muted",
                         }[tx.status]}
                       >
                         {tx.status === "paid" ? "支払い済み" : tx.status === "refunded" ? "返金" : "保留"}

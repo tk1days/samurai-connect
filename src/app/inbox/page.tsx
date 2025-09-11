@@ -1,4 +1,4 @@
-// src/app/inbox/page.tsx
+// /src/app/inbox/page.tsx
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
@@ -96,20 +96,21 @@ function useCountdown(expireIso: string) {
 }
 
 function StatusBadge({ status }: { status: RequestStatus }) {
-  const map: Record<RequestStatus, string> = {
-    pending: 'bg-amber-100 text-amber-700 ring-1 ring-amber-200',
-    accepted: 'bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200',
-    declined: 'bg-rose-100 text-rose-700 ring-1 ring-rose-200',
-    expired: 'bg-zinc-100 text-zinc-600 ring-1 ring-zinc-200',
-  };
   const label: Record<RequestStatus, string> = {
     pending: '待機中',
     accepted: '受諾',
     declined: '辞退',
     expired: '期限切れ',
   };
+  // 色は共通バッジ＋軽い差分だけ残す
+  const tone: Record<RequestStatus, string> = {
+    pending: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200',
+    accepted: 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200',
+    declined: 'bg-rose-50 text-rose-700 ring-1 ring-rose-200',
+    expired: 'bg-zinc-50 text-zinc-600 ring-1 ring-zinc-200',
+  };
   return (
-    <span className={`px-2 py-1 text-xs rounded-md ${map[status]}`}>
+    <span className={`badge ${tone[status]}`} aria-label={`ステータス: ${label[status]}`}>
       {label[status]}
     </span>
   );
@@ -117,12 +118,14 @@ function StatusBadge({ status }: { status: RequestStatus }) {
 
 function Countdown({ expiresAt }: { expiresAt: string }) {
   const { remainMs, label } = useCountdown(expiresAt);
-  if (remainMs === 0) return <span className="text-xs font-medium text-zinc-500">期限切れ</span>;
+  if (remainMs === 0)
+    return <span className="text-xs font-medium text-subtle">期限切れ</span>;
   const warn = remainMs < 60_000;
   return (
     <span
-      className={`text-xs font-semibold tabular-nums ${warn ? 'text-rose-600' : 'text-zinc-700'}`}
+      className={`text-xs font-semibold tabular-nums ${warn ? 'text-danger' : 'text-foreground'}`}
       title={`締切: ${formatTime(expiresAt)}`}
+      aria-live="polite"
     >
       {label}
     </span>
@@ -143,7 +146,6 @@ export default function InboxPage() {
       const parsed: InboxItem[] | null = raw ? JSON.parse(raw) : null;
       const base = Array.isArray(parsed) && parsed.length > 0 ? parsed : MOCK_INBOX;
 
-      // /session 側で溜めた新着（LS_NEWBUF）を取り込み
       const bufRaw = localStorage.getItem(LS_NEWBUF);
       if (bufRaw) {
         const buf: any[] = JSON.parse(bufRaw);
@@ -225,24 +227,25 @@ export default function InboxPage() {
     setItems(prev => prev.map(x => (x.id === id ? { ...x, unread: false } : x)));
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-white to-zinc-50">
+    <main className="min-h-screen">
       {/* Header */}
-      <section className="border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
-        <div className="mx-auto max-w-6xl px-4 py-6">
+      <section className="border-b surface/80 backdrop-blur supports-[backdrop-filter]:surface">
+        <div className="sc-container py-6">
           <h1 className="text-2xl font-bold tracking-tight">受信箱</h1>
-          <p className="text-sm text-zinc-600">相談リクエストを確認・対応します。</p>
+          <p className="text-sm text-subtle">相談リクエストを確認・対応します。</p>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-6 space-y-4">
+      <section className="sc-container py-6 space-y-4">
         {/* Controls */}
-        <div className="flex flex-col md:flex-row gap-3 md:items-center">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="flex-1">
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="検索（依頼者名 / トピック / メモ / リクエストID）"
-              className="w-full rounded-xl border border-zinc-200 px-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-200"
+              className="input rounded-xl"
+              aria-label="受信箱の検索"
             />
           </div>
 
@@ -250,8 +253,9 @@ export default function InboxPage() {
             <select
               value={tab}
               onChange={(e) => setTab(e.target.value as any)}
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm"
+              className="select rounded-xl bg-white text-sm"
               title="フィルタ"
+              aria-label="フィルタ"
             >
               <option value="all">すべて</option>
               <option value="unread">未読</option>
@@ -264,8 +268,9 @@ export default function InboxPage() {
             <select
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as any)}
-              className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm"
+              className="select rounded-xl bg-white text-sm"
               title="並び替え"
+              aria-label="並び替え"
             >
               <option value="created">新着順</option>
               <option value="expires">期限が近い順</option>
@@ -276,7 +281,7 @@ export default function InboxPage() {
         {/* List */}
         <div className="grid grid-cols-1 gap-3">
           {filtered.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-zinc-200 bg-white p-8 text-center text-zinc-500">
+            <div className="card border-dashed p-8 text-center text-subtle">
               該当するリクエストはありません。
             </div>
           )}
@@ -284,8 +289,8 @@ export default function InboxPage() {
           {filtered.map((item) => (
             <article
               key={item.id}
-              className={`rounded-2xl border bg-white p-4 md:p-5 transition-shadow hover:shadow-sm ${
-                item.unread ? 'border-indigo-300' : 'border-zinc-200'
+              className={`card p-4 md:p-5 transition-shadow hover:shadow ${
+                item.unread ? 'ring-1 ring-[color:var(--sc-ring)]' : ''
               }`}
             >
               <div className="flex items-start justify-between gap-3">
@@ -293,22 +298,20 @@ export default function InboxPage() {
                   <div className="flex items-center gap-2">
                     <StatusBadge status={item.status} />
                     {item.unread && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-indigo-200">
-                        ● 新着
-                      </span>
+                      <span className="badge">● 新着</span>
                     )}
-                    <span className="text-xs text-zinc-500">ID: {item.id}</span>
+                    <span className="text-xs text-subtle">ID: {item.id}</span>
                   </div>
                   <h2 className="mt-2 line-clamp-1 text-base font-semibold">
                     {item.topic}
                   </h2>
-                  <p className="mt-1 text-sm text-zinc-600">
+                  <p className="mt-1 text-sm text-muted">
                     依頼者：{item.requesterName} ／ 受信者：{item.expertName}
                   </p>
                   {item.note && (
-                    <p className="mt-2 line-clamp-2 text-sm text-zinc-700">{item.note}</p>
+                    <p className="mt-2 line-clamp-2 text-sm">{item.note}</p>
                   )}
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-zinc-500">
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-subtle">
                     <span>受信: {formatTime(item.createdAt)}</span>
                     <span>締切: {formatTime(item.expiresAt)}</span>
                     <Countdown expiresAt={item.expiresAt} />
@@ -319,7 +322,8 @@ export default function InboxPage() {
                 <div className="flex shrink-0 flex-col items-end gap-2">
                   <button
                     onClick={() => onMarkRead(item.id)}
-                    className="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-50"
+                    className="btn btn-outline text-xs"
+                    aria-label="既読にする"
                   >
                     既読にする
                   </button>
@@ -328,16 +332,18 @@ export default function InboxPage() {
                     <button
                       onClick={() => onDecline(item.id)}
                       disabled={item.status === 'declined' || item.status === 'expired'}
-                      className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-sm font-medium text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                      className="btn btn-outline text-sm disabled:opacity-50"
                       title="辞退"
+                      aria-label="辞退"
                     >
                       辞退
                     </button>
                     <button
                       onClick={() => onAccept(item.id)}
                       disabled={item.status === 'accepted' || item.status === 'expired'}
-                      className="rounded-lg border border-indigo-300 bg-indigo-600/90 px-3 py-1.5 text-sm font-semibold text-white hover:bg-indigo-600 disabled:opacity-50"
+                      className="btn btn-primary text-sm disabled:opacity-50"
                       title="受諾"
+                      aria-label="受諾"
                     >
                       受諾
                     </button>
@@ -345,7 +351,7 @@ export default function InboxPage() {
 
                   <a
                     href={`/chat/${item.id}`}
-                    className="text-xs text-indigo-700 underline underline-offset-4 hover:text-indigo-900"
+                    className="text-xs underline underline-offset-4"
                     title="チャットへ移動（モック）"
                   >
                     チャットに入室

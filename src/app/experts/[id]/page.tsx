@@ -2,19 +2,9 @@
 "use client";
 
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { use, useMemo, useState } from "react";
+import { notFound, useParams } from "next/navigation";
+import { useMemo, useState } from "react";
 import { EXPERTS, type Expert } from "@/data/experts";
-
-/** params が Promise/非Promise どちらでも安全に取り出す */
-function getIdFromParams(params: { id: string } | Promise<{ id: string }>): string {
-  const maybe = params as any;
-  const obj =
-    typeof maybe?.then === "function"
-      ? (use(params as Promise<{ id: string }>) as { id: string })
-      : (params as { id: string });
-  return decodeURIComponent(String(obj?.id ?? ""));
-}
 
 /** 共通スター表示 */
 function Stars({ value }: { value: number }) {
@@ -50,40 +40,12 @@ type Review = {
 /** 事前レビュー（存在しないIDは自動生成にフォールバック） */
 const PRESET_REVIEWS: Record<string, Review[]> = {
   "1": [
-    {
-      id: "r-1-1",
-      author: "佐々木 祐介",
-      rating: 5,
-      body:
-        "決算前の節税ポイントを具体的に示していただき、とても助かりました。説明も分かりやすかったです。",
-      createdAt: "2025-03-11",
-    },
-    {
-      id: "r-1-2",
-      author: "中小企業経営者",
-      rating: 4,
-      body:
-        "資金繰り視点の見直し案まで提案いただけたのが良かったです。オンラインでも十分でした。",
-      createdAt: "2025-02-22",
-    },
+    { id: "r-1-1", author: "佐々木 祐介", rating: 5, body: "決算前の節税ポイントを具体的に示していただき、とても助かりました。説明も分かりやすかったです。", createdAt: "2025-03-11" },
+    { id: "r-1-2", author: "中小企業経営者", rating: 4, body: "資金繰り視点の見直し案まで提案いただけたのが良かったです。オンラインでも十分でした。", createdAt: "2025-02-22" },
   ],
   "2": [
-    {
-      id: "r-2-1",
-      author: "人事担当",
-      rating: 5,
-      body:
-        "就業規則の改定ポイントを明確化してもらえ、助成金の可能性まで整理していただけました。",
-      createdAt: "2025-03-02",
-    },
-    {
-      id: "r-2-2",
-      author: "製造業",
-      rating: 4,
-      body:
-        "実務に落とし込める運用案が良かったです。資料テンプレも助かりました。",
-      createdAt: "2025-02-14",
-    },
+    { id: "r-2-1", author: "人事担当", rating: 5, body: "就業規則の改定ポイントを明確化してもらえ、助成金の可能性まで整理していただけました。", createdAt: "2025-03-02" },
+    { id: "r-2-2", author: "製造業", rating: 4, body: "実務に落とし込める運用案が良かったです。資料テンプレも助かりました。", createdAt: "2025-02-14" },
   ],
 };
 
@@ -103,13 +65,10 @@ function makeFallbackReviews(expertId: string, base = 4.6): Review[] {
   }));
 }
 
-type PageProps =
-  | { params: { id: string } }
-  | { params: Promise<{ id: string }> };
-
-export default function ExpertDetailPage(p: PageProps) {
-  // params 取り出し（Next.js 15 の Promise/非Promise両対応）
-  const id = getIdFromParams((p as any).params);
+export default function ExpertDetailPage() {
+  // ✅ use() は使わず useParams で取得
+  const params = useParams<{ id: string }>();
+  const id = decodeURIComponent(String(params?.id ?? ""));
   if (!id) return notFound();
 
   const expert = EXPERTS.find((e) => String(e.id) === id);
@@ -126,16 +85,12 @@ export default function ExpertDetailPage(p: PageProps) {
   // ボード解決（存在しない時は空配列）
   const boardMembers = useMemo(() => {
     const ids = (expert.boardMembers ?? []).filter(Boolean);
-    return ids
-      .map((x) => EXPERTS.find((e) => e.id === x))
-      .filter(Boolean) as Expert[];
+    return ids.map((x) => EXPERTS.find((e) => e.id === x)).filter(Boolean) as Expert[];
   }, [expert]);
 
   const joinedBoards = useMemo(() => {
     const ids = (expert.joinedBoards ?? []).filter(Boolean);
-    return ids
-      .map((x) => EXPERTS.find((e) => e.id === x))
-      .filter(Boolean) as Expert[];
+    return ids.map((x) => EXPERTS.find((e) => e.id === x)).filter(Boolean) as Expert[];
   }, [expert]);
 
   const reviews: Review[] = useMemo(
@@ -223,18 +178,13 @@ export default function ExpertDetailPage(p: PageProps) {
               </p>
             </section>
 
-            {/* ===== ボード領域 =====
-               ・左カード：専門家ボード（しっかり表示）
-               ・右カード：参加しているボード（控えめ表示）
-               ・データが無いときも “ブランク” のカードを表示して高さを維持
-            */}
+            {/* ===== ボード領域 ===== */}
             <div className="my-6 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
             <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {/* 専門家ボード：しっかり表示（アバター+名前、グリッド） */}
+              {/* 専門家ボード */}
               <div className="rounded-2xl border border-gray-200 bg-white/95 p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <h3 className="text-base font-semibold">専門家ボード</h3>
-                  {/* 将来：編集導線 */}
                 </div>
                 {boardMembers.length > 0 ? (
                   <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -247,24 +197,19 @@ export default function ExpertDetailPage(p: PageProps) {
                       >
                         <span
                           className={`h-7 w-7 shrink-0 rounded-full bg-gradient-to-br ${
-                            m.gender === "female"
-                              ? "from-pink-400 to-rose-500"
-                              : "from-sky-500 to-indigo-500"
+                            m.gender === "female" ? "from-pink-400 to-rose-500" : "from-sky-500 to-indigo-500"
                           }`}
                         />
-                        <span className="text-sm font-medium text-gray-900 line-clamp-1">
-                          {m.name}
-                        </span>
+                        <span className="text-sm font-medium text-gray-900 line-clamp-1">{m.name}</span>
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  // ブランク：高さだけ確保（装飾なし）
                   <div className="mt-3 min-h-20" />
                 )}
               </div>
 
-              {/* 参加しているボード：控えめ（小さめのリンクリスト） */}
+              {/* 参加しているボード */}
               <div className="rounded-2xl border border-gray-200 bg-white/95 p-5 shadow-sm">
                 <h3 className="text-base font-semibold">参加しているボード</h3>
                 {joinedBoards.length > 0 ? (
@@ -281,7 +226,6 @@ export default function ExpertDetailPage(p: PageProps) {
                     ))}
                   </ul>
                 ) : (
-                  // ブランク：高さだけ確保（装飾なし）
                   <div className="mt-3 min-h-20" />
                 )}
               </div>
@@ -319,14 +263,11 @@ export default function ExpertDetailPage(p: PageProps) {
           </div>
         </div>
 
-        {/* 右：ライブ相談＋セッション予約（控えめ） */}
+        {/* 右：ライブ相談＋セッション予約 */}
         <aside className="h-fit rounded-2xl border bg-white p-5 shadow-sm space-y-8">
-          {/* ライブ相談（主） */}
           <div>
             <h3 className="text-lg font-semibold">ライブ相談</h3>
-            <p className="mt-1 text-sm text-gray-600">
-              すぐに専門家と接続します（待機中であれば即時開始）。
-            </p>
+            <p className="mt-1 text-sm text-gray-600">すぐに専門家と接続します（待機中であれば即時開始）。</p>
             <Link
               href="/session"
               className="mt-3 block w-full rounded-lg bg-gradient-to-r from-indigo-600 to-sky-600 px-4 py-2 text-center text-white hover:brightness-105"
@@ -337,12 +278,9 @@ export default function ExpertDetailPage(p: PageProps) {
 
           <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
 
-          {/* セッション予約（副・控えめ） */}
           <div>
             <h3 className="text-lg font-semibold">セッション予約</h3>
-            <p className="mt-1 text-sm text-gray-600">
-              相談概要を送っておけば、専門家が後から確認します（モック）。
-            </p>
+            <p className="mt-1 text-sm text-gray-600">相談概要を送っておけば、専門家が後から確認します（モック）。</p>
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -350,32 +288,11 @@ export default function ExpertDetailPage(p: PageProps) {
               }}
               className="mt-3 space-y-3"
             >
-              <input
-                required
-                className="w-full rounded-lg border px-3 py-2"
-                placeholder="お名前"
-              />
-              <input
-                type="email"
-                required
-                className="w-full rounded-lg border px-3 py-2"
-                placeholder="メールアドレス"
-              />
-              <input
-                type="text"
-                className="w-full rounded-lg border px-3 py-2"
-                placeholder="希望日時（任意）"
-              />
-              <textarea
-                required
-                rows={3}
-                className="w-full rounded-lg border px-3 py-2"
-                placeholder="相談概要（簡単でOK）"
-              />
-              <button
-                type="submit"
-                className="w-full rounded-lg border px-4 py-2 text-sm hover:bg-gray-50"
-              >
+              <input required className="w-full rounded-lg border px-3 py-2" placeholder="お名前" />
+              <input type="email" required className="w-full rounded-lg border px-3 py-2" placeholder="メールアドレス" />
+              <input type="text" className="w-full rounded-lg border px-3 py-2" placeholder="希望日時（任意）" />
+              <textarea required rows={3} className="w-full rounded-lg border px-3 py-2" placeholder="相談概要（簡単でOK）" />
+              <button type="submit" className="w-full rounded-lg border px-4 py-2 text-sm hover:bg-gray-50">
                 予約リクエスト送信（モック）
               </button>
             </form>

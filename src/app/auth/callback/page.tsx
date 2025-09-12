@@ -2,14 +2,13 @@
 
 import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { getSupabase } from "@/lib/supabase"; // getSupabaseを正しくインポート
+import { getSupabase } from "@/lib/supabase";
 
 function AuthCallbackContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
     const supabase = getSupabase();
-
     const run = async () => {
       const code = searchParams.get("code");
       if (code) {

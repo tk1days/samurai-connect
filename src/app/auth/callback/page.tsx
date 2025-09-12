@@ -1,28 +1,27 @@
+// ./src/app/auth/callback/page.tsx
 "use client";
 
 import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { getSupabase } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase"; // ← getSupabase ではなく supabase を使用
 
 function AuthCallbackContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const supabase = getSupabase();
-    const run = async () => {
-      const code = searchParams.get("code");
-      if (code) {
-        await supabase.auth.exchangeCodeForSession(code);
-        window.location.href = "/dashboard";
-      }
-    };
-    run();
+    const code = searchParams.get("code");
+    if (!code) return;
+
+    // OAuth コードをセッションへ交換
+    supabase.auth
+      .exchangeCodeForSession({ code })
+      .catch((err) => console.error("[auth/callback] exchange error:", err));
   }, [searchParams]);
 
-  return <div className="p-6">認証処理中…</div>;
+  return <div className="p-6 text-sm">Signing you in…</div>;
 }
 
-export default function AuthCallback() {
+export default function Page() {
   return (
     <Suspense>
       <AuthCallbackContent />

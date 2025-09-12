@@ -1,30 +1,35 @@
 "use client";
 
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation"; // 1. useSearchParams をインポート
-import { supabase } from "@/lib/supabase";
+import { Suspense, useEffect } from "react"; // 1. Suspense を react からインポートします
+import { useSearchParams } from "next/navigation";
+import { getSupabase } from "@/lib/supabase";
 
-export default function AuthCallback() {
-  // 2. useSearchParams フックを使って、URLのクエリパラメータを取得できるようにする
+// 2. useSearchParamsを使う実際の処理を、新しいコンポーネントに切り出します
+function AuthCallbackContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
+    const supabase = getSupabase();
+
     const run = async () => {
-      // 3. URLから 'code' という名前のパラメータを取得する
       const code = searchParams.get("code");
-
-      // 4. codeが存在する場合のみ、処理を実行する
       if (code) {
-        // Google から返ってきたコードをセッションに交換
-        // 5. 取得したcodeを引数として関数に渡す
         await supabase.auth.exchangeCodeForSession(code);
-
-        // セッション確定後にダッシュボードへ
         window.location.href = "/dashboard";
       }
     };
     run();
-  }, [searchParams]); // 6. useEffectの依存配列にsearchParamsを追加
+  }, [searchParams]);
 
+  // このコンポーネントが表示されるのは一瞬ですが、認証中の表示を出しておきます
   return <div className="p-6">認証処理中…</div>;
+}
+
+// 3. 元のページコンポーネントを「Suspenseで囲うだけ」のシンプルな役割にします
+export default function AuthCallback() {
+  return (
+    <Suspense>
+      <AuthCallbackContent />
+    </Suspense>
+  );
 }

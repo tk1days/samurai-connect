@@ -32,25 +32,34 @@ function Stars({ value }: { value: number }) {
 type Review = {
   id: string;
   author: string;
-  rating: number; // 1..5
+  rating: number;
   body: string;
   createdAt: string;
 };
 
-/** 事前レビュー（存在しないIDは自動生成にフォールバック） */
+/** 事前レビュー */
 const PRESET_REVIEWS: Record<string, Review[]> = {
   "1": [
-    { id: "r-1-1", author: "佐々木 祐介", rating: 5, body: "決算前の節税ポイントを具体的に示していただき、とても助かりました。説明も分かりやすかったです。", createdAt: "2025-03-11" },
-    { id: "r-1-2", author: "中小企業経営者", rating: 4, body: "資金繰り視点の見直し案まで提案いただけたのが良かったです。オンラインでも十分でした。", createdAt: "2025-02-22" },
-  ],
-  "2": [
-    { id: "r-2-1", author: "人事担当", rating: 5, body: "就業規則の改定ポイントを明確化してもらえ、助成金の可能性まで整理していただけました。", createdAt: "2025-03-02" },
-    { id: "r-2-2", author: "製造業", rating: 4, body: "実務に落とし込める運用案が良かったです。資料テンプレも助かりました。", createdAt: "2025-02-14" },
+    {
+      id: "r-1-1",
+      author: "佐々木 祐介",
+      rating: 5,
+      body: "決算前の節税ポイントを具体的に示していただき、とても助かりました。説明も分かりやすかったです。",
+      createdAt: "2025-03-11",
+    },
+    {
+      id: "r-1-2",
+      author: "中小企業経営者",
+      rating: 4,
+      body: "資金繰り視点の見直し案まで提案いただけたのが良かったです。オンラインでも十分でした。",
+      createdAt: "2025-02-22",
+    },
   ],
 };
 
+/** fallbackレビュー生成 */
 function makeFallbackReviews(expertId: string, base = 4.6): Review[] {
-  const names = ["匿名ユーザー", "小売業", "IT企業", "製造業"];
+  const names = ["匿名ユーザー", "小売業", "IT企業"];
   const notes = [
     "初回でも丁寧に背景を理解してくれて、次のアクションまで固まりました。",
     "自社状況に合わせた選択肢提示が良かったです。",
@@ -66,7 +75,6 @@ function makeFallbackReviews(expertId: string, base = 4.6): Review[] {
 }
 
 export default function ExpertDetailPage() {
-  // ✅ use() は使わず useParams で取得
   const params = useParams<{ id: string }>();
   const id = decodeURIComponent(String(params?.id ?? ""));
   if (!id) return notFound();
@@ -74,28 +82,33 @@ export default function ExpertDetailPage() {
   const expert = EXPERTS.find((e) => String(e.id) === id);
   if (!expert) return notFound();
 
+  /** fallback付きの安全化 */
   const safeRating = Math.max(0, Math.min(5, expert.rating ?? 0));
+  const safeReviews = expert.reviews ?? 0;
+  const gender = expert.gender ?? "male";
+
   const avatarGradient =
-    expert.gender === "female" ? "from-pink-400 to-rose-500" : "from-sky-500 to-indigo-500";
+    gender === "female" ? "from-pink-400 to-rose-500" : "from-sky-500 to-indigo-500";
   const cardTint =
-    expert.gender === "female"
+    gender === "female"
       ? "bg-gradient-to-b from-rose-50 to-white border-rose-100 ring-rose-100/70"
       : "bg-gradient-to-b from-sky-50 to-white border-sky-100 ring-sky-100/70";
 
-  // ボード解決（存在しない時は空配列）
+  /** ボード */
   const boardMembers = useMemo(() => {
     const ids = (expert.boardMembers ?? []).filter(Boolean);
     return ids.map((x) => EXPERTS.find((e) => e.id === x)).filter(Boolean) as Expert[];
-  }, [expert]);
+  }, [expert.boardMembers]);
 
   const joinedBoards = useMemo(() => {
     const ids = (expert.joinedBoards ?? []).filter(Boolean);
     return ids.map((x) => EXPERTS.find((e) => e.id === x)).filter(Boolean) as Expert[];
-  }, [expert]);
+  }, [expert.joinedBoards]);
 
+  /** レビュー */
   const reviews: Review[] = useMemo(
-    () => PRESET_REVIEWS[expert.id] ?? makeFallbackReviews(expert.id, expert.rating ?? 4.6),
-    [expert.id, expert.rating]
+    () => PRESET_REVIEWS[expert.id] ?? makeFallbackReviews(expert.id, safeRating),
+    [expert.id, safeRating]
   );
   const [visibleCount, setVisibleCount] = useState(3);
 
@@ -103,7 +116,9 @@ export default function ExpertDetailPage() {
     <main className="mx-auto max-w-6xl px-4 py-8">
       {/* パンくず */}
       <div className="mb-4 text-sm text-gray-600">
-        <Link href="/experts" className="underline">専門家を探す</Link>
+        <Link href="/experts" className="underline">
+          専門家を探す
+        </Link>
         <span className="mx-1">/</span>
         {expert.name}
       </div>
@@ -114,7 +129,9 @@ export default function ExpertDetailPage() {
           <div className="h-1 w-full rounded-t-2xl bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500" />
           <div className="p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-              <div className={`grid h-16 w-16 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGradient} text-2xl font-bold text-white shadow`}>
+              <div
+                className={`grid h-16 w-16 shrink-0 place-items-center rounded-full bg-gradient-to-br ${avatarGradient} text-2xl font-bold text-white shadow`}
+              >
                 {expert.name[0]}
               </div>
 
@@ -143,14 +160,12 @@ export default function ExpertDetailPage() {
                 </div>
 
                 <p className="mt-1 text-gray-700">{expert.title}</p>
-
-                {/* 所在地 */}
                 <p className="mt-1 text-sm font-medium text-gray-900">所在地：{expert.location}</p>
 
                 <div className="mt-2 flex items-center gap-2 text-sm text-gray-700">
                   <Stars value={safeRating} />
                   <span>{safeRating.toFixed(1)}</span>
-                  <span className="text-gray-400">（{expert.reviews}件）</span>
+                  <span className="text-gray-400">（{safeReviews}件）</span>
                 </div>
 
                 <div className="mt-2 text-sm text-gray-700">
@@ -159,33 +174,33 @@ export default function ExpertDetailPage() {
               </div>
             </div>
 
+            {/* タグ */}
             {expert.tags?.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {expert.tags.map((tag) => (
-                  <span key={`${expert.id}-${tag}`} className="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-700">
+                  <span
+                    key={`${expert.id}-${tag}`}
+                    className="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-xs text-gray-700"
+                  >
                     {tag}
                   </span>
                 ))}
               </div>
             )}
 
+            {/* 自己紹介 */}
             <div className="my-6 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-
             <section>
               <h2 className="text-xl font-semibold">自己紹介</h2>
-              <p className="mt-2 whitespace-pre-wrap text-gray-800 leading-relaxed">
-                {expert.bio}
-              </p>
+              <p className="mt-2 whitespace-pre-wrap text-gray-800 leading-relaxed">{expert.bio}</p>
             </section>
 
-            {/* ===== ボード領域 ===== */}
+            {/* ボード */}
             <div className="my-6 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
             <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* 専門家ボード */}
               <div className="rounded-2xl border border-gray-200 bg-white/95 p-5 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-base font-semibold">専門家ボード</h3>
-                </div>
+                <h3 className="text-base font-semibold">専門家ボード</h3>
                 {boardMembers.length > 0 ? (
                   <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {boardMembers.map((m) => (
@@ -231,13 +246,16 @@ export default function ExpertDetailPage() {
               </div>
             </section>
 
-            {/* レビュー一覧 */}
+            {/* レビュー */}
             <div className="my-8 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
             <section>
               <h2 className="text-xl font-semibold">レビュー</h2>
               <ul className="mt-3 space-y-4">
                 {reviews.slice(0, visibleCount).map((r) => (
-                  <li key={r.id} className="rounded-xl border border-gray-200 bg-white/90 p-4 shadow-sm">
+                  <li
+                    key={r.id}
+                    className="rounded-xl border border-gray-200 bg-white/90 p-4 shadow-sm"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="font-medium">{r.author}</div>
                       <div className="text-xs text-gray-500">{r.createdAt}</div>
@@ -263,7 +281,7 @@ export default function ExpertDetailPage() {
           </div>
         </div>
 
-        {/* 右：ライブ相談＋セッション予約 */}
+        {/* 右：ライブ相談＋予約 */}
         <aside className="h-fit rounded-2xl border bg-white p-5 shadow-sm space-y-8">
           <div>
             <h3 className="text-lg font-semibold">ライブ相談</h3>
@@ -302,4 +320,3 @@ export default function ExpertDetailPage() {
     </main>
   );
 }
-

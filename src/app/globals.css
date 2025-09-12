@@ -152,6 +152,12 @@
   .btn-danger { background: var(--sc-danger); color: #fff; }
   .btn-danger:hover { filter: brightness(0.95); }
 
+  /* ✅ disabled 状態を追加 */
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   /* Inputs */
   .input, .select, .textarea {
     @apply w-full rounded-lg border px-3 py-2 text-sm outline-none;
@@ -201,7 +207,7 @@
     background: linear-gradient(to right, transparent, var(--sc-border), transparent);
   }
 
-  /* Table (unified look) */
+  /* Table */
   .sc-table {
     @apply w-full text-sm;
     border-collapse: separate;
@@ -217,7 +223,7 @@
   }
   .sc-table tbody tr:last-child td { @apply border-b-0; }
 
-  /* Page header bar (sticky headers already use Tailwind classes; this harmonizes blur tone) */
+  /* Header bar */
   .sc-header {
     @apply sticky top-0 z-30 w-full border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60;
   }

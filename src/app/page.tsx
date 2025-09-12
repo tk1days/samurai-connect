@@ -3,6 +3,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import ExpertCard from "@/components/ExpertCard";
 import { EXPERTS } from "@/data/experts";
 
@@ -12,10 +13,14 @@ export default function Home() {
   const router = useRouter();
   const [q, setQ] = useState("");
 
-  // ホームではオンライン優先→評価順で上位6名だけ表示
+  // ホームではオンライン優先 → 評価順で上位6名を表示
   const featured = useMemo(() => {
     return [...EXPERTS]
-      .sort((a, b) => Number(b.online) - Number(a.online) || (b.rating ?? 0) - (a.rating ?? 0))
+      .sort(
+        (a, b) =>
+          Number(b.online) - Number(a.online) ||
+          (b.rating ?? 0) - (a.rating ?? 0)
+      )
       .slice(0, 6);
   }, []);
 
@@ -26,13 +31,13 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
-      {/* ヒーロー（タイトルは削除して重複回避） */}
+      {/* ヒーロー */}
       <section className="mb-8 rounded-2xl border bg-white p-6 shadow-sm">
         <p className="text-gray-600">
           今すぐ、専門家とつながる。リアルタイム相談にも対応。
         </p>
 
-        {/* 検索行（ボタン2つを横一列・同じ高さ・改行禁止） */}
+        {/* 検索行 */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -41,6 +46,7 @@ export default function Home() {
           className="mt-4 flex flex-nowrap gap-2"
         >
           <input
+            id="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className="w-full rounded-lg border px-4 py-2"
@@ -50,22 +56,22 @@ export default function Home() {
           <div className="flex flex-shrink-0 gap-2">
             <button
               type="submit"
-              className="h-10 rounded-lg bg-blue-600 px-4 text-white hover:bg-blue-700"
+              className="h-10 flex items-center justify-center rounded-lg bg-blue-600 px-4 text-white hover:bg-blue-700"
             >
               検索
             </button>
 
-            <a
+            <Link
               href="/experts"
-              className="h-10 rounded-lg border px-4 text-center leading-10 hover:bg-gray-50 whitespace-nowrap"
+              className="h-10 flex items-center justify-center rounded-lg border px-4 hover:bg-gray-50 whitespace-nowrap"
               aria-label="専門家一覧へ"
             >
               一覧へ
-            </a>
+            </Link>
           </div>
         </form>
 
-        {/* クイックカテゴリ → /experts?q=... へ */}
+        {/* クイックカテゴリ */}
         <div className="mt-3 flex flex-wrap gap-2">
           {QUICK.map((t) => (
             <button
@@ -83,9 +89,9 @@ export default function Home() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">注目の専門家</h2>
-          <a href="/experts" className="text-sm underline">
+          <Link href="/experts" className="text-sm underline">
             すべて見る
-          </a>
+          </Link>
         </div>
 
         <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3">

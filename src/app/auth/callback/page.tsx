@@ -1,13 +1,13 @@
-// ./src/app/auth/callback/page.tsx
+// src/app/auth/callback/page.tsx
 "use client";
 
 import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-// SSG を禁止して動的に実行（プリレンダーエラー回避）
+// ルート設定：動的＆キャッシュ無効（revalidate は使わない）
 export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 function AuthCallbackInner() {
   const searchParams = useSearchParams();
@@ -16,9 +16,8 @@ function AuthCallbackInner() {
     const code = searchParams.get("code");
     if (!code) return;
 
-    // Supabase v2: string を渡す
     supabase.auth
-      .exchangeCodeForSession(code)
+      .exchangeCodeForSession(code) // string を渡す
       .catch((err) =>
         console.error("[auth/callback] exchange error:", err)
       );
@@ -34,3 +33,4 @@ export default function Page() {
     </Suspense>
   );
 }
+

@@ -1,4 +1,3 @@
-// src/app/chat/[id]/page.tsx
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -11,6 +10,12 @@ type Msg = {
   text: string;
   at: number;
 };
+
+// ================= 修正箇所 START: BroadcastChannelで送受信するデータの型を定義 =================
+type BroadcastData =
+  | { type: "msg"; msg: Msg }
+  | { type: "status"; connected: boolean };
+// ================= 修正箇所 END =================
 
 const lsKey = (roomId: string) => `sc_chat_${roomId}`;
 const bcName = (roomId: string) => `sc-chat-${roomId}`;
@@ -51,15 +56,17 @@ export default function ChatPage() {
     const ch = new BroadcastChannel(bcName(roomId));
     bcRef.current = ch;
 
-    ch.onmessage = (ev) => {
-      const data = ev.data as any;
+    // ================= 修正箇所 START: MessageEventに型を適用し、as any を削除 =================
+    ch.onmessage = (ev: MessageEvent<BroadcastData>) => {
+      const data = ev.data; // as any を削除
       if (data?.type === "msg") {
-        const msg = data.msg as Msg;
+        const msg = data.msg; // as Msg も不要に
         setList((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
       } else if (data?.type === "status") {
         setConnected(Boolean(data.connected));
       }
     };
+    // ================= 修正箇所 END =================
 
     ch.postMessage({ type: "status", connected: true });
 
@@ -84,7 +91,9 @@ export default function ChatPage() {
     setList((prev) => [...prev, msg]);
     setText("");
     try {
-      bcRef.current?.postMessage({ type: "msg", msg });
+      // 送信するデータも型に沿ったオブジェクトにする
+      const payload: BroadcastData = { type: "msg", msg };
+      bcRef.current?.postMessage(payload);
     } catch {}
   };
 

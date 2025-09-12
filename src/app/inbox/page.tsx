@@ -1,8 +1,22 @@
-// /src/app/inbox/page.tsx
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
 import { EXPERTS } from '@/data/experts';
+
+// ================= 修正箇所 START: sessionページのInvite型を定義 =================
+/** /sessionページから渡される招待のデータ型 */
+type Invite = {
+  type?: 'add'; // BroadcastChannel経由で追加されるプロパティ
+  id: string;
+  expertId: string;
+  clientName: string;
+  topic: string;
+  createdAt: number;
+  ttlSec: number;
+  unread: number;
+  note?: string;
+};
+// ================= 修正箇所 END =================
 
 /** ========= Types ========= */
 type RequestStatus = 'pending' | 'accepted' | 'declined' | 'expired';
@@ -148,7 +162,9 @@ export default function InboxPage() {
 
       const bufRaw = localStorage.getItem(LS_NEWBUF);
       if (bufRaw) {
-        const buf: any[] = JSON.parse(bufRaw);
+        // ================= 修正箇所 START: any[] を Invite[] に修正 =================
+        const buf: Invite[] = JSON.parse(bufRaw);
+        // ================= 修正箇所 END =================
         const merged = [...buf, ...base].map(toInboxItem);
         setItems(dedupe(merged));
         localStorage.removeItem(LS_NEWBUF);
@@ -164,8 +180,10 @@ export default function InboxPage() {
   useEffect(() => {
     if (typeof window === 'undefined' || !('BroadcastChannel' in window)) return;
     const ch = new BroadcastChannel(BC_NAME);
-    const onMsg = (ev: MessageEvent) => {
+    // ================= 修正箇所 START: MessageEventに型を適用 =================
+    const onMsg = (ev: MessageEvent<Invite>) => {
       const msg = ev.data;
+      // ================= 修正箇所 END =================
       if (!msg || msg.type !== 'add') return;
       setItems(prev => dedupe([toInboxItem(msg), ...prev]));
     };
@@ -252,7 +270,9 @@ export default function InboxPage() {
           <div className="flex items-center gap-2">
             <select
               value={tab}
-              onChange={(e) => setTab(e.target.value as any)}
+              // ================= 修正箇所 START: as any を具体的な型に修正 =================
+              onChange={(e) => setTab(e.target.value as typeof tab)}
+              // ================= 修正箇所 END =================
               className="select rounded-xl bg-white text-sm"
               title="フィルタ"
               aria-label="フィルタ"
@@ -267,7 +287,9 @@ export default function InboxPage() {
 
             <select
               value={sortKey}
-              onChange={(e) => setSortKey(e.target.value as any)}
+              // ================= 修正箇所 START: as any を具体的な型に修正 =================
+              onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
+              // ================= 修正箇所 END =================
               className="select rounded-xl bg-white text-sm"
               title="並び替え"
               aria-label="並び替え"
@@ -367,18 +389,21 @@ export default function InboxPage() {
 }
 
 /** ========= Convert & Utils ========= */
-function toInboxItem(payload: any): InboxItem {
-  // /session の Invite 形 { id, expertId, clientName, topic, createdAt, ttlSec, unread, note }
-  if (payload && payload.expertId) {
-    const exp = EXPERTS.find(e => e.id === payload.expertId);
+// ================= 修正箇所 START: payload の型を修正 =================
+function toInboxItem(payload: Invite | InboxItem): InboxItem {
+  // /session の Invite 形 { id, expertId, ... }
+  if ('expertId' in payload) {
+    const p = payload; // Invite型として扱う
+    // ================= 修正箇所 END =================
+    const exp = EXPERTS.find(e => e.id === p.expertId);
     const expertName = exp ? `${exp.name}（${exp.license ?? '資格なし'}）` : '不明な専門家';
-    const createdMs = Number(payload.createdAt) || Date.now();
-    const ttlSec = Math.max(30, Math.min(600, Number(payload.ttlSec) || 180));
+    const createdMs = Number(p.createdAt) || Date.now();
+    const ttlSec = Math.max(30, Math.min(600, Number(p.ttlSec) || 180));
     return {
-      id: String(payload.id),
-      requesterName: String(payload.clientName || '匿名ユーザー'),
-      topic: String(payload.topic || '相談があります'),
-      note: payload.note ? String(payload.note) : undefined,
+      id: String(p.id),
+      requesterName: String(p.clientName || '匿名ユーザー'),
+      topic: String(p.topic || '相談があります'),
+      note: p.note ? String(p.note) : undefined,
       expertName,
       createdAt: new Date(createdMs).toISOString(),
       expiresAt: new Date(createdMs + ttlSec * 1000).toISOString(),

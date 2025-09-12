@@ -1,4 +1,3 @@
-// src/app/experts/[id]/page.tsx
 "use client";
 
 import Link from "next/link";
@@ -75,15 +74,40 @@ function makeFallbackReviews(expertId: string, base = 4.6): Review[] {
 }
 
 export default function ExpertDetailPage() {
+  // ================= 修正箇所 START =================
+  // 1. Reactフックと、それに関連する変数の定義をコンポーネントの先頭に移動します
   const params = useParams<{ id: string }>();
+  const [visibleCount, setVisibleCount] = useState(3);
+
   const id = decodeURIComponent(String(params?.id ?? ""));
-  if (!id) return notFound();
+  const expert = useMemo(() => EXPERTS.find((e) => String(e.id) === id), [id]);
 
-  const expert = EXPERTS.find((e) => String(e.id) === id);
-  if (!expert) return notFound();
+  const boardMembers = useMemo(() => {
+    if (!expert) return []; // expertが存在しない場合に備える
+    const ids = (expert.boardMembers ?? []).filter(Boolean);
+    return ids.map((x) => EXPERTS.find((e) => e.id === x)).filter(Boolean) as Expert[];
+  }, [expert]);
 
-  /** fallback付きの安全化 */
-  const safeRating = Math.max(0, Math.min(5, expert.rating ?? 0));
+  const joinedBoards = useMemo(() => {
+    if (!expert) return []; // expertが存在しない場合に備える
+    const ids = (expert.joinedBoards ?? []).filter(Boolean);
+    return ids.map((x) => EXPERTS.find((e) => e.id === x)).filter(Boolean) as Expert[];
+  }, [expert]);
+
+  const safeRating = expert?.rating ?? 0;
+
+  const reviews: Review[] = useMemo(() => {
+    if (!expert) return []; // expertが存在しない場合に備える
+    return PRESET_REVIEWS[expert.id] ?? makeFallbackReviews(expert.id, safeRating);
+  }, [expert, safeRating]);
+
+  // 2. すべてのフックの呼び出しが終わった後で、早期リターンのチェックを行います
+  if (!id || !expert) {
+    return notFound();
+  }
+  // ================= 修正箇所 END =================
+
+  /** fallback付きの安全化 (expertが存在することが保証された後で定義) */
   const safeReviews = expert.reviews ?? 0;
   const gender = expert.gender ?? "male";
 
@@ -93,24 +117,6 @@ export default function ExpertDetailPage() {
     gender === "female"
       ? "bg-gradient-to-b from-rose-50 to-white border-rose-100 ring-rose-100/70"
       : "bg-gradient-to-b from-sky-50 to-white border-sky-100 ring-sky-100/70";
-
-  /** ボード */
-  const boardMembers = useMemo(() => {
-    const ids = (expert.boardMembers ?? []).filter(Boolean);
-    return ids.map((x) => EXPERTS.find((e) => e.id === x)).filter(Boolean) as Expert[];
-  }, [expert.boardMembers]);
-
-  const joinedBoards = useMemo(() => {
-    const ids = (expert.joinedBoards ?? []).filter(Boolean);
-    return ids.map((x) => EXPERTS.find((e) => e.id === x)).filter(Boolean) as Expert[];
-  }, [expert.joinedBoards]);
-
-  /** レビュー */
-  const reviews: Review[] = useMemo(
-    () => PRESET_REVIEWS[expert.id] ?? makeFallbackReviews(expert.id, safeRating),
-    [expert.id, safeRating]
-  );
-  const [visibleCount, setVisibleCount] = useState(3);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">

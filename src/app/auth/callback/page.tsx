@@ -1,10 +1,9 @@
 "use client";
 
-import { Suspense, useEffect } from "react"; // 1. Suspense を react からインポートします
+import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase"; // getSupabaseを正しくインポート
 
-// 2. useSearchParamsを使う実際の処理を、新しいコンポーネントに切り出します
 function AuthCallbackContent() {
   const searchParams = useSearchParams();
 
@@ -21,11 +20,9 @@ function AuthCallbackContent() {
     run();
   }, [searchParams]);
 
-  // このコンポーネントが表示されるのは一瞬ですが、認証中の表示を出しておきます
   return <div className="p-6">認証処理中…</div>;
 }
 
-// 3. 元のページコンポーネントを「Suspenseで囲うだけ」のシンプルな役割にします
 export default function AuthCallback() {
   return (
     <Suspense>

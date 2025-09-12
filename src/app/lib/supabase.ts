@@ -1,23 +1,27 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+// Supabaseクライアントのインスタンスを保持する変数です
 let supabaseClient: SupabaseClient | null = null;
 
 /**
- * Supabaseクライアントをシングルトンとして取得します。
+ * Supabaseクライアントを取得するための関数です。
+ * この関数を他のファイルから呼び出して使います。
  */
-// ================= 修正箇所 START: export を追加 =================
 export function getSupabase() {
-// ================= 修正箇所 END =================
+  // まだインスタンスが作られていなければ、新しく作成します
   if (!supabaseClient) {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+    // 環境変数が設定されていない場合はエラーを出します
     if (!supabaseUrl || !supabaseAnonKey) {
-      // エラーメッセージをより分かりやすく変更
       throw new Error('Supabase URL or Anon Key is not defined in environment variables.');
     }
 
+    // ここで初めてクライアントを作成します
     supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
   }
+
+  // 作成済みのクライアントを返します
   return supabaseClient;
 }

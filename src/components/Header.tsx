@@ -3,51 +3,38 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { useRouter, usePathname } from "next/navigation";
 
-type UserRole = "pro" | "user" | null;
+const LS_PRO = "sc_is_pro"; // 擬似ログイン判定（ローカル）
 
 export default function Header() {
-  const [role, setRole] = useState<UserRole>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+  const [isPro, setIsPro] = useState(false);
 
+  // 初期ロード
   useEffect(() => {
-    let mounted = true;
-
-    const readSession = async () => {
-      try {
-        if (!supabase) return; // env 未設定時は何もしない
-        const { data } = await supabase.auth.getUser();
-        if (!mounted) return;
-        const r = (data.user?.user_metadata?.role as UserRole) ?? null;
-        setRole(r);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    readSession();
-
-    // 認証状態の変化を監視（ログイン/ログアウト）
-    const sub = supabase?.auth.onAuthStateChange(() => {
-      readSession();
-    });
-
-    return () => {
-      mounted = false;
-      sub?.data.subscription.unsubscribe();
-    };
+    try {
+      setIsPro(localStorage.getItem(LS_PRO) === "1");
+    } catch {}
   }, []);
 
-  const isPro = role === "pro";
-  const handleLogout = async () => {
-    try {
-      await supabase?.auth.signOut();
-    } finally {
-      // サインアウト後はトップへ
-      window.location.href = "/";
-    }
+  // 擬似ログイン（イメージ重視フェーズ）
+  const mockLogin = () => {
+    try { localStorage.setItem(LS_PRO, "1"); } catch {}
+    setIsPro(true);
+    router.push("/pro/mypage");
   };
+
+  const logout = () => {
+    try { localStorage.removeItem(LS_PRO); } catch {}
+    setIsPro(false);
+    // どのページからでもトップへ
+    router.push("/");
+  };
+
+  // プロ中は“プロ用マイページ”への戻り導線を常設
+  const showProBackLink = isPro && pathname !== "/pro/mypage";
 
   return (
     <header className="sticky top-0 z-30 w-full border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
@@ -55,50 +42,46 @@ export default function Header() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <span className="text-lg font-extrabold tracking-tight">Samurai Connect</span>
-          <span className="rounded-full bg-indigo-600/90 px-2 py-0.5 text-[10px] font-semibold text-white">
-            β
-          </span>
+          <span className="rounded-full bg-indigo-600/90 px-2 py-0.5 text-[10px] font-semibold text-white">β</span>
         </Link>
 
         {/* Nav */}
         <nav className="flex items-center gap-4 text-sm">
-          <Link href="/experts" className="text-zinc-700 hover:text-zinc-900">
-            専門家を探す
-          </Link>
+          <Link href="/experts" className="text-zinc-700 hover:text-zinc-900">専門家を探す</Link>
+          <Link href="/mypage" className="text-zinc-700 hover:text-zinc-900">マイページ</Link>
 
-          {/* 利用者マイページ */}
-          <Link href="/mypage" className="text-zinc-700 hover:text-zinc-900">
-            マイページ
-          </Link>
+          {/* プロ中は“戻る導線”を常時表示 */}
+          {showProBackLink && (
+            <Link
+              href="/pro/mypage"
+              className="rounded-lg border border-zinc-200 px-3 py-1.5 text-zinc-700 hover:bg-zinc-50"
+              title="プロ用マイページへ戻る"
+            >
+              プロ用マイページ
+            </Link>
+          )}
 
-          {/* ダッシュボード（必要なら残す） */}
-          <Link
-            href="/dashboard"
-            className="rounded-lg border border-zinc-200 px-3 py-1.5 text-zinc-700 hover:bg-zinc-50"
-          >
-            ダッシュボード
-          </Link>
-
-          {/* 右端：プロはログアウト、そうでなければプロ用マイページ */}
+          {/* 右端の主ボタン：プロ状態で切替 */}
           {isPro ? (
             <button
-              onClick={handleLogout}
-              className="rounded-lg bg-rose-600 px-3 py-1.5 font-medium text-white hover:bg-rose-700"
-              aria-busy={loading}
+              onClick={logout}
+              className="rounded-lg bg-indigo-600 px-3 py-1.5 font-medium text-white hover:bg-indigo-700"
+              aria-label="ログアウト"
             >
               ログアウト
             </button>
           ) : (
-            <Link
-              href="/pro/mypage"
+            <button
+              onClick={mockLogin}
               className="rounded-lg bg-indigo-600 px-3 py-1.5 font-medium text-white hover:bg-indigo-700"
+              aria-label="ログイン"
+              title="（暫定）押すとプロ用マイページへ"
             >
-              プロ用マイページ
-            </Link>
+              ログイン
+            </button>
           )}
         </nav>
       </div>
     </header>
   );
 }
-

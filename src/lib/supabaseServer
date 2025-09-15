@@ -1,0 +1,22 @@
+// /src/lib/supabaseServer.ts
+import { cookies } from "next/headers";
+import {
+  createServerComponentClient,
+  createRouteHandlerClient,
+  SupabaseClient,
+} from "@supabase/auth-helpers-nextjs";
+import { Database } from "@/types/supabase"; // 型定義があれば利用。なければ削除可
+
+/**
+ * Supabase Server Client
+ * - Server Component / Route Handler で利用する
+ * - 認証情報は Cookie から自動取得
+ */
+
+/** Server Component 用 */
+export const supabaseServer = () =>
+  createServerComponentClient<Database>({ cookies });
+
+/** Route Handler 用 */
+export const supabaseRoute = (cookieStore = cookies()) =>
+  createRouteHandlerClient<Database>({ cookies: () => cookieStore });

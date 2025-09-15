@@ -1,36 +1,45 @@
-// src/app/auth/callback/page.tsx
 "use client";
 
-import { Suspense, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getSupabaseBrowser } from "@/lib/supabaseClient";
 
-// ルート設定：動的＆キャッシュ無効（revalidate は使わない）
-export const dynamic = "force-dynamic";
-export const fetchCache = "force-no-store";
-
-function AuthCallbackInner() {
-  const searchParams = useSearchParams();
+export default function AuthCallbackPage() {
+  const router = useRouter();
+  const _sp = useSearchParams();
+  const [msg, setMsg] = useState("サインイン処理中…");
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    if (!code) return;
+    (async () => {
+      try {
+        const supabase = getSupabaseBrowser();
 
-    supabase.auth
-      .exchangeCodeForSession(code) // string を渡す
-      .catch((err) =>
-        console.error("[auth/callback] exchange error:", err)
-      );
-  }, [searchParams]);
+        // OAuth コード → セッション交換（URL を渡す）
+        const { error } = await supabase.auth.exchangeCodeForSession(
+          window.location.href
+        );
+        if (error) {
+          console.error(error);
+          setMsg(`サインイン失敗：${error.message}`);
+          return;
+        }
 
-  return <div className="p-6 text-sm">Signing you in…</div>;
-}
+        setMsg("サインイン完了。リダイレクトします…");
+        router.replace("/pro/mypage");
+      } catch (e: any) {
+        console.error(e);
+        setMsg(`エラー：${e?.message ?? String(e)}`);
+      }
+    })();
+  }, [router, _sp]);
 
-export default function Page() {
   return (
-    <Suspense fallback={<div className="p-6 text-sm">Signing you in…</div>}>
-      <AuthCallbackInner />
-    </Suspense>
+    <div className="mx-auto max-w-md p-6">
+      <h1 className="text-xl font-bold mb-2">Auth Callback</h1>
+      <p className="text-sm text-gray-600 whitespace-pre-wrap">{msg}</p>
+    </div>
   );
 }
+
+
 

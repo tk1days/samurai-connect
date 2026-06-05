@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { MOCK_EXPERTS } from "@/lib/mock";
+import { supabase } from "@/lib/supabase";
 import { Suspense } from "react";
 
 function WaitRoom() {
@@ -11,13 +12,26 @@ function WaitRoom() {
   const router = useRouter();
   const expertId = searchParams.get("expert");
   const [now, setNow] = useState(Date.now());
-  const [starting, setStarting] = useState(false);
+  const [roomUrl, setRoomUrl] = useState<string | null>(null);
   const startRef = useRef(Date.now());
 
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
+
+  // Supabaseからroom_urlを取得
+  useEffect(() => {
+    if (!expertId) return;
+    supabase
+      .from("experts")
+      .select("room_url")
+      .eq("id", expertId)
+      .single()
+      .then(({ data }) => {
+        if (data?.room_url) setRoomUrl(data.room_url);
+      });
+  }, [expertId]);
 
   const expert = useMemo(
     () => expertId ? MOCK_EXPERTS.find((e) => e.id === expertId) : MOCK_EXPERTS[0],
@@ -33,26 +47,16 @@ function WaitRoom() {
     ? "from-pink-400 to-rose-500"
     : "from-sky-500 to-indigo-500";
 
-  // ビデオ通話を開始
-  const startVideo = async () => {
-    setStarting(true);
-    try {
-      const res = await fetch("/api/daily", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ expertId: expertId ?? "demo" }),
-      });
-      const { name } = await res.json();
-      router.push(`/video/${name}`);
-    } catch (e) {
-      alert("通話の開始に失敗しました。もう一度試してください。");
-      setStarting(false);
+  const startVideo = () => {
+    if (roomUrl) {
+      window.open(roomUrl, "_blank");
+    } else {
+      alert("ビデオルームが設定されていません。専門家にお問い合わせください。");
     }
   };
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
-      {/* ヘッダー */}
       <div className="mb-6 flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className={`grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} font-bold text-white`}>
@@ -68,15 +72,12 @@ function WaitRoom() {
             <p className="text-sm text-zinc-500">{expert?.title}</p>
           </div>
         </div>
-
-        {/* カウントダウン */}
         <div className={`text-2xl font-bold tabular-nums ${expired ? "text-red-500" : "text-indigo-600"}`}>
           {expired ? "00:00" : `${mm}:${ss}`}
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr,300px]">
-        {/* メインエリア */}
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
           <div className="flex h-80 flex-col items-center justify-center gap-6 bg-gradient-to-b from-indigo-50 to-white p-8 text-center">
             {expired ? (
@@ -93,23 +94,20 @@ function WaitRoom() {
                   📹
                 </div>
                 <div>
-                  <p className="font-semibold text-zinc-900">専門家の承認を待っています</p>
-                  <p className="mt-1 text-sm text-zinc-500">承認されるとビデオ通話が始まります</p>
+                  <p className="font-semibold text-zinc-900">ビデオ通話の準備ができています</p>
+                  <p className="mt-1 text-sm text-zinc-500">ボタンを押すと新しいタブでビデオ通話が始まります</p>
                 </div>
                 <button
                   onClick={startVideo}
-                  disabled={starting}
-                  className="rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 px-8 py-3 font-medium text-white shadow-sm hover:brightness-105 disabled:opacity-60"
+                  className="rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 px-8 py-3 font-medium text-white shadow-sm hover:brightness-105"
                 >
-                  {starting ? "接続中…" : "ビデオ通話を開始する"}
+                  ビデオ通話を開始する
                 </button>
-                <p className="text-xs text-zinc-400">※ デモ用：ボタンを押すとすぐに接続できます</p>
               </>
             )}
           </div>
         </div>
 
-        {/* 専門家情報 */}
         <div className="rounded-2xl border bg-white p-4 shadow-sm">
           <h3 className="font-semibold">相手の専門家</h3>
           <div className="mt-3 space-y-2 text-sm text-zinc-600">

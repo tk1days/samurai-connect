@@ -22,29 +22,19 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 space-y-16">
-
-      {/* ヒーロー */}
       <section className="rounded-2xl border bg-gradient-to-br from-indigo-50 to-white p-8 shadow-sm">
         <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
-          今すぐ、顔を見て、<br className="sm:hidden" />専門家に相談できる
+          今すぐ、顔を見て、専門家に相談できる
         </h1>
-        <p className="mt-2 text-zinc-500">
-          待機中の税理士・司法書士・社労士が今すぐ対応。30分無料。
-        </p>
-        <form
-          onSubmit={(e) => { e.preventDefault(); goSearch(q); }}
-          className="mt-6 flex gap-2"
-        >
+        <p className="mt-2 text-zinc-500">待機中の税理士・司法書士・社労士が今すぐ対応。30分無料。</p>
+        <form onSubmit={(e) => { e.preventDefault(); goSearch(q); }} className="mt-6 flex gap-2">
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className="flex-1 rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
             placeholder="悩みやキーワードで検索（例：相続、会社設立、節税…）"
           />
-          <button
-            type="submit"
-            className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700"
-          >
+          <button type="submit" className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700">
             検索
           </button>
         </form>
@@ -61,11 +51,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 注目の専門家 */}
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">今すぐ相談できる専門家</h2>
-          <a href="/experts" className="text-sm text-indigo-600 hover:underline">すべて見る</a>
+          <button onClick={() => router.push('/experts')} className="text-sm text-indigo-600 hover:underline">すべて見る</button>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((e) => (
@@ -74,7 +63,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* サービスの特徴 */}
       <section className="rounded-2xl bg-gradient-to-br from-indigo-600 to-sky-500 px-10 py-12 text-white shadow-lg">
         <h2 className="text-2xl font-bold mb-8 text-center">Samurai Connect が選ばれる理由</h2>
         <div className="grid gap-8 sm:grid-cols-3 text-center">
@@ -95,15 +83,14 @@ export default function Home() {
           </div>
         </div>
         <div className="mt-10 text-center">
-          
-            href="/experts"
-            className="inline-block rounded-xl bg-white text-indigo-600 font-semibold px-8 py-3 text-sm shadow hover:bg-indigo-50"
+          <button
+            onClick={() => router.push('/experts')}
+            className="rounded-xl bg-white text-indigo-600 font-semibold px-8 py-3 text-sm shadow hover:bg-indigo-50"
           >
             専門家を探してみる
-          </a>
+          </button>
         </div>
       </section>
-
     </main>
   );
 }

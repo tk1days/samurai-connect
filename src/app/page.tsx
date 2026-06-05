@@ -63,29 +63,33 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="rounded-2xl bg-gradient-to-br from-indigo-600 to-sky-500 px-10 py-12 text-white shadow-lg">
-        <h2 className="text-2xl font-bold mb-8 text-center">Samurai Connect が選ばれる理由</h2>
-        <div className="grid gap-8 sm:grid-cols-3 text-center">
-          <div>
-            <div className="text-4xl mb-3">⚡</div>
-            <h3 className="font-bold text-lg mb-1">今すぐつながる</h3>
-            <p className="text-sm text-white/75">予約不要。待機中の専門家にワンクリックで即接続。</p>
+      <section className="border-t pt-16">
+        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-500 text-center mb-3">Why Samurai Connect</p>
+        <h2 className="text-3xl font-bold text-center text-zinc-900 mb-4">専門家相談を、もっとシンプルに</h2>
+        <p className="text-center text-zinc-400 text-sm mb-14">予約もメールも不要。今すぐ、顔を見て話せる。</p>
+
+        <div className="grid sm:grid-cols-3 gap-px bg-zinc-100 rounded-2xl overflow-hidden border border-zinc-100">
+          <div className="bg-white px-8 py-10">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-xl mb-5">⚡</div>
+            <h3 className="font-semibold text-zinc-900 mb-2">即時接続</h3>
+            <p className="text-sm text-zinc-400 leading-relaxed">待機中の専門家にワンクリックでつながる。予約も問い合わせも不要。</p>
           </div>
-          <div>
-            <div className="text-4xl mb-3">🎥</div>
-            <h3 className="font-bold text-lg mb-1">顔を見て相談</h3>
-            <p className="text-sm text-white/75">ビデオ通話で対面感覚。資料の画面共有も可能。</p>
+          <div className="bg-white px-8 py-10 border-l border-r border-zinc-100">
+            <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-xl mb-5">🎥</div>
+            <h3 className="font-semibold text-zinc-900 mb-2">ビデオで対面相談</h3>
+            <p className="text-sm text-zinc-400 leading-relaxed">高画質ビデオ通話で、まるでオフィスに行ったような安心感。</p>
           </div>
-          <div>
-            <div className="text-4xl mb-3">🆓</div>
-            <h3 className="font-bold text-lg mb-1">初回30分無料</h3>
-            <p className="text-sm text-white/75">まず気軽に試せる。合えば継続相談・顧問契約へ。</p>
+          <div className="bg-white px-8 py-10">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-xl mb-5">🆓</div>
+            <h3 className="font-semibold text-zinc-900 mb-2">初回30分無料</h3>
+            <p className="text-sm text-zinc-400 leading-relaxed">費用ゼロで試せる。合えば継続、合わなければそれでOK。</p>
           </div>
         </div>
+
         <div className="mt-10 text-center">
           <button
             onClick={() => router.push('/experts')}
-            className="rounded-xl bg-white text-indigo-600 font-semibold px-8 py-3 text-sm shadow hover:bg-indigo-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 text-white font-medium px-7 py-3 text-sm hover:bg-zinc-700 transition"
           >
             専門家を探してみる
           </button>

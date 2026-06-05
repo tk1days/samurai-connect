@@ -13,6 +13,8 @@ function WaitRoom() {
   const expertId = searchParams.get("expert");
   const [now, setNow] = useState(Date.now());
   const [roomUrl, setRoomUrl] = useState<string | null>(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [userName, setUserName] = useState("");
   const startRef = useRef(Date.now());
 
   useEffect(() => {
@@ -20,7 +22,6 @@ function WaitRoom() {
     return () => clearInterval(t);
   }, []);
 
-  // Supabaseからroom_urlを取得
   useEffect(() => {
     if (!expertId) return;
     supabase
@@ -49,14 +50,53 @@ function WaitRoom() {
 
   const startVideo = () => {
     if (roomUrl) {
-      window.open(roomUrl, "_blank");
+      setShowNameModal(true);
     } else {
       alert("ビデオルームが設定されていません。専門家にお問い合わせください。");
     }
   };
 
+  const joinRoom = () => {
+    if (!userName.trim()) return;
+    const url = `${roomUrl}?t=${encodeURIComponent(userName)}`;
+    window.open(url, "_blank");
+    setShowNameModal(false);
+  };
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
+      {showNameModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-80 rounded-2xl bg-white p-6 shadow-xl">
+            <h2 className="mb-1 text-lg font-semibold">お名前を入力してください</h2>
+            <p className="mb-4 text-sm text-zinc-500">通話内での表示名になります</p>
+            <input
+              autoFocus
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && joinRoom()}
+              placeholder="例：山田 太郎"
+              className="w-full rounded-xl border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
+            />
+            <div className="mt-4 flex gap-2">
+              <button
+                onClick={() => setShowNameModal(false)}
+                className="flex-1 rounded-xl border py-2 text-sm text-zinc-600 hover:bg-gray-50"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={joinRoom}
+                disabled={!userName.trim()}
+                className="flex-1 rounded-xl bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-40"
+              >
+                通話に参加する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-6 flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className={`grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} font-bold text-white`}>

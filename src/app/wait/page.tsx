@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { MOCK_EXPERTS } from "@/lib/mock";
 import { Suspense } from "react";
 
 function WaitRoom() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const expertId = searchParams.get("expert");
   const [now, setNow] = useState(Date.now());
+  const [starting, setStarting] = useState(false);
   const startRef = useRef(Date.now());
 
   useEffect(() => {
@@ -31,6 +33,23 @@ function WaitRoom() {
     ? "from-pink-400 to-rose-500"
     : "from-sky-500 to-indigo-500";
 
+  // ビデオ通話を開始
+  const startVideo = async () => {
+    setStarting(true);
+    try {
+      const res = await fetch("/api/daily", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expertId: expertId ?? "demo" }),
+      });
+      const { name } = await res.json();
+      router.push(`/video/${name}`);
+    } catch (e) {
+      alert("通話の開始に失敗しました。もう一度試してください。");
+      setStarting(false);
+    }
+  };
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
       {/* ヘッダー */}
@@ -43,7 +62,7 @@ function WaitRoom() {
             <div className="flex items-center gap-2">
               <span className="font-semibold">{expert?.display_name}</span>
               <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
-                呼び出し中…
+                {expired ? "期限切れ" : "呼び出し中…"}
               </span>
             </div>
             <p className="text-sm text-zinc-500">{expert?.title}</p>
@@ -52,33 +71,41 @@ function WaitRoom() {
 
         {/* カウントダウン */}
         <div className={`text-2xl font-bold tabular-nums ${expired ? "text-red-500" : "text-indigo-600"}`}>
-          {expired ? "期限切れ" : `${mm}:${ss}`}
+          {expired ? "00:00" : `${mm}:${ss}`}
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1fr,300px]">
-        {/* チャットエリア */}
+        {/* メインエリア */}
         <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-          <div className="h-96 overflow-y-auto bg-gray-50 p-4">
-            <div className="mx-auto mb-4 w-fit rounded-full bg-white px-3 py-1 text-xs text-zinc-500 shadow-sm">
-              {expired ? "招待の有効期限が切れました" : "専門家の入室を待っています…"}
-            </div>
-            <div className="flex justify-end">
-              <div className="max-w-[70%] rounded-2xl rounded-br-sm bg-indigo-600 px-3 py-2 text-sm text-white">
-                よろしくお願いします。相談させていただきます。
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 border-t bg-white p-3">
-            <input
-              disabled
-              placeholder={expired ? "期限切れです" : "接続後にメッセージを送れます"}
-              className="flex-1 rounded-xl border bg-gray-50 px-3 py-2 text-sm text-gray-400"
-            />
-            <button disabled className="rounded-xl bg-gray-200 px-4 py-2 text-sm text-gray-400">
-              送信
-            </button>
+          <div className="flex h-80 flex-col items-center justify-center gap-6 bg-gradient-to-b from-indigo-50 to-white p-8 text-center">
+            {expired ? (
+              <>
+                <div className="text-4xl">⏰</div>
+                <p className="text-zinc-500">招待の有効期限が切れました</p>
+                <Link href="/experts" className="rounded-xl bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                  専門家一覧に戻る
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="h-16 w-16 animate-pulse rounded-full bg-indigo-100 flex items-center justify-center text-2xl">
+                  📹
+                </div>
+                <div>
+                  <p className="font-semibold text-zinc-900">専門家の承認を待っています</p>
+                  <p className="mt-1 text-sm text-zinc-500">承認されるとビデオ通話が始まります</p>
+                </div>
+                <button
+                  onClick={startVideo}
+                  disabled={starting}
+                  className="rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 px-8 py-3 font-medium text-white shadow-sm hover:brightness-105 disabled:opacity-60"
+                >
+                  {starting ? "接続中…" : "ビデオ通話を開始する"}
+                </button>
+                <p className="text-xs text-zinc-400">※ デモ用：ボタンを押すとすぐに接続できます</p>
+              </>
+            )}
           </div>
         </div>
 
@@ -86,13 +113,13 @@ function WaitRoom() {
         <div className="rounded-2xl border bg-white p-4 shadow-sm">
           <h3 className="font-semibold">相手の専門家</h3>
           <div className="mt-3 space-y-2 text-sm text-zinc-600">
+            <p className="font-medium text-zinc-900">{expert?.display_name}</p>
             <p>{expert?.license}</p>
             <p>{expert?.title}</p>
             <p>📍 {expert?.location}</p>
             <p>⭐ {expert?.rating.toFixed(1)} ({expert?.review_count}件)</p>
-            <p className="font-medium text-zinc-900">{expert?.price_label}</p>
+            <p className="font-medium text-indigo-600">{expert?.price_label}</p>
           </div>
-
           <Link
             href={`/experts/${expert?.id}`}
             className="mt-4 block w-full rounded-xl border py-2 text-center text-sm hover:bg-gray-50"
@@ -102,7 +129,7 @@ function WaitRoom() {
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end gap-2">
+      <div className="mt-4 flex justify-end">
         <Link href="/experts" className="rounded-xl border bg-white px-4 py-2 text-sm hover:bg-gray-50">
           一覧に戻る
         </Link>

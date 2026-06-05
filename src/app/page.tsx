@@ -69,7 +69,7 @@ export default function Home() {
           <div className="hidden lg:block relative">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[4/3]">
               <img
-                src="https://images.unsplash.com/photo-1560472355-536de3962603?w=800&auto=format&fit=crop&q=80"
+                src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&auto=format&fit=crop&q=80"
                 alt="ビデオ通話で専門家に相談"
                 className="w-full h-full object-cover"
               />
@@ -131,9 +131,9 @@ export default function Home() {
           <p className="text-sm text-zinc-400 text-center mb-10">面倒な手続きなし。今すぐ始められる。</p>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { num: "01", icon: "⚡", title: "予約不要・即つながる", desc: "待機中の専門家にワンクリックで即接続。問い合わせも不要。", img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&auto=format&fit=crop&q=80" },
-              { num: "02", icon: "🎥", title: "顔を見て安心相談", desc: "ビデオ通話で対面感覚。資料の画面共有もできる。", img: "https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04?w=400&auto=format&fit=crop&q=80" },
-              { num: "03", icon: "✅", title: "初回30分完全無料", desc: "費用ゼロでお試し。合えば継続、合わなければOK。", img: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&auto=format&fit=crop&q=80" },
+              { num: "01", icon: "⚡", title: "予約不要・即つながる", desc: "待機中の専門家にワンクリックで即接続。問い合わせも不要。", img: "https://images.unsplash.com/photo-1553484771-047a44eee27b?w=400&auto=format&fit=crop&q=80" },
+              { num: "02", icon: "🎥", title: "顔を見て安心相談", desc: "ビデオ通話で対面感覚。資料の画面共有もできる。", img: "https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=400&auto=format&fit=crop&q=80" },
+              { num: "03", icon: "✅", title: "初回30分完全無料", desc: "費用ゼロでお試し。合えば継続、合わなければOK。", img: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&auto=format&fit=crop&q=80" },
             ].map((f) => (
               <div key={f.num} className="rounded-2xl overflow-hidden border border-zinc-100 bg-white shadow-sm hover:shadow-md transition">
                 <div className="h-40 overflow-hidden">
@@ -152,7 +152,7 @@ export default function Home() {
         {/* CTA */}
         <section className="rounded-2xl overflow-hidden relative">
           <img
-            src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1200&auto=format&fit=crop&q=80"
+            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&auto=format&fit=crop&q=80"
             alt="専門家に相談"
             className="absolute inset-0 w-full h-full object-cover"
           />

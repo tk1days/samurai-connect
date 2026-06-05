@@ -30,7 +30,7 @@ export default function Home() {
       <section className="bg-[#0f172a] text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 grid lg:grid-cols-2 gap-12 items-center">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/40 px-4 py-1.5 text-xs font-semibold text-emerald-400 mb-6">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/30 px-4 py-1.5 text-xs font-semibold text-white/80 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               今すぐ相談できる専門家が待機中
             </span>
@@ -75,7 +75,7 @@ export default function Home() {
                 <div
                   key={e.id}
                   onClick={() => router.push(`/wait?expert=${e.id}`)}
-                  className={`rounded-2xl bg-white/5 border border-white/10 p-4 cursor-pointer hover:bg-white/10 hover:border-indigo-500/50 transition ${i === 0 ? '`}
+                  className="rounded-2xl bg-white/5 border border-white/10 p-4 cursor-pointer hover:bg-white/10 hover:border-indigo-500/50 transition"
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${grad} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>

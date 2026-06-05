@@ -1,231 +1,177 @@
-// /src/app/pro/profile/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { EXPERTS } from "@/data/experts";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
-/**
- * モック前提のプロフィール編集ページ
- * - 認証やDBは未接続のため localStorage に保存します
- * - ログイン中の専門家IDは暫定で "1" として扱います（必要に応じて差し替え）
- */
-const MOCK_EXPERT_ID = "1";
-const LS_KEY = (id: string) => `sc_pro_profile_${id}`;
-
-type Form = {
-  name: string;
-  license?: string;
-  title: string;
-  location: string;
-  price: string;
-  tagsCsv: string; // 表示はカンマ区切り
-  bio: string;
-  online: boolean;
-};
+const LICENSES = ["税理士", "司法書士", "社会保険労務士", "行政書士", "中小企業診断士", "その他"];
 
 export default function ProProfilePage() {
-  // 既存データ（モック）：まず既存 EXPERT から初期値を作る
-  const base = useMemo(() => {
-    const e = EXPERTS.find((x) => x.id === MOCK_EXPERT_ID);
-    return e
-      ? ({
-          name: e.name,
-          license: e.license ?? "",
-          title: e.title,
-          location: e.location ?? "",
-          price: e.price ?? "",
-          tagsCsv: (e.tags ?? []).join(","),
-          bio: e.bio ?? "",
-          online: Boolean(e.online),
-        } as Form)
-      : ({
-          name: "",
-          license: "",
-          title: "",
-          location: "",
-          price: "",
-          tagsCsv: "",
-          bio: "",
-          online: false,
-        } as Form);
-  }, []);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
 
-  const [form, setForm] = useState<Form>(base);
-  const [loaded, setLoaded] = useState(false);
+  const [form, setForm] = useState({
+    license: "",
+    title: "",
+    bio: "",
+    location: "",
+    gender: "male" as "male" | "female" | "other",
+  });
 
-  // 初回：localStorage に保存済みならそちらを採用
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(LS_KEY(MOCK_EXPERT_ID));
-      if (raw) {
-        const saved = JSON.parse(raw) as Partial<Form>;
-        setForm((prev) => ({ ...prev, ...saved }));
-      }
-    } catch {
-      // noop
-    } finally {
-      setLoaded(true);
-    }
-  }, []);
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) router.replace("/auth");
+      setLoading(false);
+    });
+  }, [router]);
 
-  // 保存
-  const save = () => {
-    try {
-      localStorage.setItem(LS_KEY(MOCK_EXPERT_ID), JSON.stringify(form));
-      alert("プロフィールを保存しました（ローカル保存：モック）");
-    } catch {
-      alert("保存に失敗しました");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { router.replace("/auth"); return; }
+
+    // profilesテーブルにrole=expertで登録
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert({
+        id: session.user.id,
+        role: "expert",
+        display_name: session.user.user_metadata?.full_name ?? "",
+        avatar_url: session.user.user_metadata?.avatar_url ?? null,
+      });
+
+    if (profileError) {
+      alert("エラーが発生しました: " + profileError.message);
+      setSaving(false);
+      return;
     }
+
+    // expertsテーブルに詳細情報を登録
+    const { error: expertError } = await supabase
+      .from("experts")
+      .upsert({
+        id: session.user.id,
+        license: form.license,
+        title: form.title,
+        bio: form.bio,
+        location: form.location,
+        gender: form.gender,
+        price_label: "30分 / 無料",
+        is_online: false,
+        is_approved: false,
+      });
+
+    if (expertError) {
+      alert("エラーが発生しました: " + expertError.message);
+      setSaving(false);
+      return;
+    }
+
+    setDone(true);
+    setSaving(false);
   };
 
-  // 変更ハンドラ
-  const set = <K extends keyof Form>(k: K, v: Form[K]) =>
-    setForm((prev) => ({ ...prev, [k]: v }));
+  if (loading) return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+    </div>
+  );
 
-  if (!loaded) {
-    return <div className="sc-container py-6 text-sm text-subtle">読み込み中…</div>;
-  }
+  if (done) return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+      <div className="text-4xl">✅</div>
+      <h2 className="text-xl font-bold">登録申請を受け付けました</h2>
+      <p className="text-zinc-500">審査完了後にご連絡します。通常1〜3営業日以内です。</p>
+    </div>
+  );
 
   return (
-    <main className="sc-container py-8 space-y-6">
-      {/* パンくず */}
-      <div className="text-sm text-muted">
-        <Link href="/pro/mypage" className="underline">プロ用マイページ</Link>
-        <span className="mx-1 text-subtle">/</span>
-        プロフィール編集
-      </div>
+    <main className="mx-auto max-w-xl px-4 py-8">
+      <h1 className="mb-2 text-2xl font-bold">専門家として登録する</h1>
+      <p className="mb-6 text-sm text-zinc-500">
+        登録後、運営が資格を確認して承認します。承認後に一般公開されます。
+      </p>
 
-      {/* ヘッダー */}
-      <header>
-        <h1>プロフィール編集</h1>
-        <p className="mt-1 text-subtle">
-          表示名・肩書・自己紹介・所在地などを編集します（保存先：ブラウザの
-          <code className="mx-1 rounded bg-zinc-100 px-1">localStorage</code>）。
-        </p>
-      </header>
-
-      {/* フォームカード */}
-      <section className="card p-5 grid gap-4">
-        {/* 表示名 */}
+      <form onSubmit={handleSubmit} className="space-y-5 rounded-2xl border bg-white p-6 shadow-sm">
         <div>
-          <label className="text-sm text-muted">表示名</label>
-          <input
-            value={form.name}
-            onChange={(e) => set("name", e.target.value)}
-            className="input mt-1"
-            placeholder="例）山田 太郎"
-          />
+          <label className="mb-1 block text-sm font-medium">資格・肩書 *</label>
+          <select
+            required
+            value={form.license}
+            onChange={(e) => setForm({ ...form, license: e.target.value })}
+            className="w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
+          >
+            <option value="">選択してください</option>
+            {LICENSES.map((l) => <option key={l} value={l}>{l}</option>)}
+          </select>
         </div>
 
-        {/* 資格 */}
         <div>
-          <label className="text-sm text-muted">資格（任意）</label>
+          <label className="mb-1 block text-sm font-medium">専門タイトル *</label>
           <input
-            value={form.license ?? ""}
-            onChange={(e) => set("license", e.target.value)}
-            className="input mt-1"
-            placeholder="例）税理士（無資格の場合は空欄）"
-          />
-        </div>
-
-        {/* 肩書 */}
-        <div>
-          <label className="text-sm text-muted">肩書 / 提供メニュー</label>
-          <input
+            required
             value={form.title}
-            onChange={(e) => set("title", e.target.value)}
-            className="input mt-1"
-            placeholder="例）法人税・決算相談"
+            onChange={(e) => setForm({ ...form, title: e.target.value })}
+            placeholder="例：法人税・決算・節税相談"
+            className="w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
           />
         </div>
 
-        {/* 所在地 */}
         <div>
-          <label className="text-sm text-muted">所在地</label>
+          <label className="mb-1 block text-sm font-medium">自己紹介 *</label>
+          <textarea
+            required
+            rows={4}
+            value={form.bio}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+            placeholder="経歴・得意分野・相談者へのメッセージなど"
+            className="w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
+          />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium">所在地</label>
           <input
             value={form.location}
-            onChange={(e) => set("location", e.target.value)}
-            className="input mt-1"
-            placeholder="例）東京都 千代田区"
+            onChange={(e) => setForm({ ...form, location: e.target.value })}
+            placeholder="例：東京都 千代田区"
+            className="w-full rounded-xl border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
           />
         </div>
 
-        {/* 料金表示（目安） */}
         <div>
-          <label className="text-sm text-muted">料金（表示用）</label>
-          <input
-            value={form.price}
-            onChange={(e) => set("price", e.target.value)}
-            className="input mt-1"
-            placeholder="例）30分/¥5,000"
-          />
+          <label className="mb-1 block text-sm font-medium">性別</label>
+          <div className="flex gap-4">
+            {(["male", "female", "other"] as const).map((g) => (
+              <label key={g} className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  value={g}
+                  checked={form.gender === g}
+                  onChange={() => setForm({ ...form, gender: g })}
+                />
+                {g === "male" ? "男性" : g === "female" ? "女性" : "その他"}
+              </label>
+            ))}
+          </div>
         </div>
 
-        {/* タグ */}
-        <div>
-          <label className="text-sm text-muted">タグ（カンマ区切り）</label>
-          <input
-            value={form.tagsCsv}
-            onChange={(e) => set("tagsCsv", e.target.value)}
-            className="input mt-1"
-            placeholder="例）法人税,節税,中小企業"
-          />
-          <p className="mt-1 text-xs text-subtle">一覧・詳細ページの検索や表示で使用します。</p>
+        <div className="rounded-xl bg-indigo-50 p-3 text-sm text-indigo-700">
+          💡 料金は現在「30分 / 無料」で固定です。リリース後に設定可能になります。
         </div>
 
-        {/* 自己紹介 */}
-        <div>
-          <label className="text-sm text-muted">自己紹介</label>
-          <textarea
-            value={form.bio}
-            onChange={(e) => set("bio", e.target.value)}
-            rows={5}
-            className="textarea mt-1"
-            placeholder="経歴や得意分野、相談スタイルなどを記載してください。"
-          />
-        </div>
-
-        {/* オンライン待機フラグ */}
-        <div className="flex items-center gap-2">
-          <input
-            id="online"
-            type="checkbox"
-            checked={form.online}
-            onChange={(e) => set("online", e.target.checked)}
-            className="h-4 w-4"
-          />
-          <label htmlFor="online" className="text-sm text-muted">
-            オンライン待機中として表示する（一覧で優先表示）
-          </label>
-        </div>
-
-        <div className="divider" />
-
-        {/* 操作 */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={save} className="btn btn-primary">
-            保存する
-          </button>
-
-          <Link href="/pro/mypage" className="btn btn-outline">
-            プロ用マイページに戻る
-          </Link>
-
-          <Link
-            href={`/experts/${MOCK_EXPERT_ID}`}
-            className="text-sm underline"
-            title="公開プロフィール（モック）を確認"
-          >
-            公開プロフィールを確認
-          </Link>
-        </div>
-
-        {/* 注意 */}
-        <p className="text-xs text-subtle">
-          ※ 現在はモック版です。保存内容はブラウザ内にのみ保持されます。実データ反映（/src/data/experts.ts など）は次段階で接続します。
-        </p>
-      </section>
+        <button
+          type="submit"
+          disabled={saving}
+          className="w-full rounded-xl bg-indigo-600 py-3 font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+        >
+          {saving ? "送信中…" : "登録申請する"}
+        </button>
+      </form>
     </main>
   );
 }

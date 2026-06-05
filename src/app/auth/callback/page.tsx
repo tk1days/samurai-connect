@@ -1,45 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { getSupabaseBrowser } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
-  const _sp = useSearchParams();
   const [msg, setMsg] = useState("サインイン処理中…");
 
   useEffect(() => {
-    (async () => {
-      try {
-        const supabase = getSupabaseBrowser();
-
-        // OAuth コード → セッション交換（URL を渡す）
-        const { error } = await supabase.auth.exchangeCodeForSession(
-          window.location.href
-        );
-        if (error) {
-          console.error(error);
-          setMsg(`サインイン失敗：${error.message}`);
-          return;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event) => {
+        if (event === "SIGNED_IN") {
+          router.replace("/experts");
+        } else if (event === "SIGNED_OUT") {
+          setMsg("サインインに失敗しました。");
         }
-
-        setMsg("サインイン完了。リダイレクトします…");
-        router.replace("/pro/mypage");
-      } catch (e: any) {
-        console.error(e);
-        setMsg(`エラー：${e?.message ?? String(e)}`);
       }
-    })();
-  }, [router, _sp]);
+    );
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   return (
-    <div className="mx-auto max-w-md p-6">
-      <h1 className="text-xl font-bold mb-2">Auth Callback</h1>
-      <p className="text-sm text-gray-600 whitespace-pre-wrap">{msg}</p>
+    <div className="flex min-h-[70vh] items-center justify-center">
+      <div className="text-center">
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+        <p className="mt-4 text-sm text-zinc-500">{msg}</p>
+      </div>
     </div>
   );
 }
-
-
-

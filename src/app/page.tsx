@@ -29,35 +29,28 @@ export default function Home() {
       {/* ヒーロー */}
       <section className="bg-[#0f172a] text-white">
         <div className="mx-auto max-w-6xl px-4 py-16 grid lg:grid-cols-2 gap-12 items-center">
-          {/* 左 */}
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 border border-emerald-500/30 px-4 py-1.5 text-xs font-semibold text-emerald-400 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               今すぐ相談できる専門家が待機中
             </span>
-            <h1 className="text-4xl sm:text-5xl font-bold leading-[1.15] mb-5">
+            <h1 className="text-4xl sm:text-5xl font-bold leading-[1.15] mb-5 text-white">
               税務・法律の悩みを<br />
               <span className="text-indigo-400">今すぐ</span>、顔を見て<br />
               解決できる
             </h1>
-            <p className="text-zinc-400 text-base mb-8 leading-relaxed">
+            <p className="text-zinc-300 text-base mb-8 leading-relaxed">
               待機中の税理士・司法書士・社労士に<br />
               ワンクリックでビデオ通話。予約不要・初回30分無料。
             </p>
-            <form
-              onSubmit={(e) => { e.preventDefault(); goSearch(q); }}
-              className="flex gap-2 mb-5"
-            >
+            <form onSubmit={(e) => { e.preventDefault(); goSearch(q); }} className="flex gap-2 mb-5">
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                className="flex-1 rounded-xl bg-white/10 border border-white/20 px-5 py-3.5 text-sm text-white placeholder-zinc-500 outline-none focus:border-indigo-400 focus:bg-white/15"
+                className="flex-1 rounded-xl bg-white/10 border border-white/20 px-5 py-3.5 text-sm text-white placeholder-zinc-400 outline-none focus:border-indigo-400 focus:bg-white/15"
                 placeholder="例：相続、節税、会社設立…"
               />
-              <button
-                type="submit"
-                className="rounded-xl bg-indigo-500 hover:bg-indigo-400 px-6 py-3.5 text-sm font-semibold text-white transition"
-              >
+              <button type="submit" className="rounded-xl bg-indigo-500 hover:bg-indigo-400 px-6 py-3.5 text-sm font-semibold text-white transition">
                 検索
               </button>
             </form>
@@ -66,7 +59,7 @@ export default function Home() {
                 <button
                   key={cat.slug}
                   onClick={() => router.push(`/experts?category=${cat.slug}`)}
-                  className="rounded-full bg-white/8 border border-white/15 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/15 hover:text-white transition"
+                  className="rounded-full bg-white/10 border border-white/20 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/20 hover:text-white transition"
                 >
                   {cat.name}
                 </button>
@@ -154,19 +147,39 @@ export default function Home() {
 
         {/* 特徴 */}
         <section>
-          <h2 className="text-xl font-bold text-zinc-900 mb-2 text-center">選ばれる3つの理由</h2>
+          <h2 className="text-2xl font-bold text-zinc-900 mb-2 text-center">選ばれる3つの理由</h2>
           <p className="text-sm text-zinc-400 text-center mb-10">面倒な手続きなし。今すぐ始められる。</p>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { num: "01", icon: "⚡", title: "予約不要・即つながる", desc: "待機中の専門家にワンクリックで即接続。問い合わせも不要。" },
-              { num: "02", icon: "🎥", title: "顔を見て安心相談", desc: "ビデオ通話で対面感覚。資料の画面共有もできる。" },
-              { num: "03", icon: "✅", title: "初回30分完全無料", desc: "費用ゼロでお試し。合えば継続、合わなければOK。" },
+              {
+                num: "01",
+                title: "予約不要・即つながる",
+                desc: "待機中の専門家にワンクリックで即接続。問い合わせも不要。",
+                img: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&auto=format&fit=crop&q=80",
+              },
+              {
+                num: "02",
+                title: "顔を見て安心相談",
+                desc: "ビデオ通話で対面感覚の相談。資料の画面共有もできる。",
+                img: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=600&auto=format&fit=crop&q=80",
+              },
+              {
+                num: "03",
+                title: "初回30分完全無料",
+                desc: "費用ゼロでお試し。合えば継続、合わなければOK。",
+                img: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&auto=format&fit=crop&q=80",
+              },
             ].map((f) => (
-              <div key={f.num} className="rounded-2xl border border-zinc-100 bg-white p-7 shadow-sm hover:shadow-md transition">
-                <span className="text-xs font-bold text-indigo-400 tracking-widest">{f.num}</span>
-                <div className="text-3xl mt-3 mb-4">{f.icon}</div>
-                <h3 className="font-bold text-zinc-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-zinc-400 leading-relaxed">{f.desc}</p>
+              <div key={f.num} className="rounded-2xl overflow-hidden border border-zinc-100 bg-white shadow-sm hover:shadow-md transition">
+                <div className="relative h-44 overflow-hidden">
+                  <img src={f.img} alt={f.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                  <span className="absolute top-3 left-3 bg-white/90 text-zinc-700 text-xs font-bold px-2.5 py-1 rounded-full">{f.num}</span>
+                </div>
+                <div className="p-5">
+                  <h3 className="font-bold text-zinc-900 mb-1.5">{f.title}</h3>
+                  <p className="text-sm text-zinc-500 leading-relaxed">{f.desc}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -174,7 +187,7 @@ export default function Home() {
 
         {/* CTA */}
         <section className="rounded-2xl bg-[#0f172a] text-white px-10 py-14 text-center">
-          <h2 className="text-2xl font-bold mb-3">今すぐ専門家に相談してみる</h2>
+          <h2 className="text-2xl font-bold mb-3 text-white">今すぐ専門家に相談してみる</h2>
           <p className="text-zinc-400 text-sm mb-8">予約不要・初回30分無料・すぐつながる</p>
           <button
             onClick={() => router.push('/experts')}

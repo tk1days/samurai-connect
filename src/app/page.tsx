@@ -21,80 +21,123 @@ export default function Home() {
   };
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 space-y-16">
-      <section className="rounded-2xl border bg-gradient-to-br from-indigo-50 to-white p-8 shadow-sm">
-        <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
-          今すぐ、顔を見て、専門家に相談できる
-        </h1>
-        <p className="mt-2 text-zinc-500">待機中の税理士・司法書士・社労士が今すぐ対応。30分無料。</p>
-        <form onSubmit={(e) => { e.preventDefault(); goSearch(q); }} className="mt-6 flex gap-2">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="flex-1 rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
-            placeholder="悩みやキーワードで検索（例：相続、会社設立、節税…）"
-          />
-          <button type="submit" className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white hover:bg-indigo-700">
-            検索
-          </button>
-        </form>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {MOCK_CATEGORIES.map((cat) => (
+    <div>
+      {/* ヒーロー */}
+      <section className="bg-gradient-to-br from-indigo-600 via-indigo-500 to-sky-400 text-white">
+        <div className="mx-auto max-w-6xl px-4 py-20 text-center">
+          <span className="inline-block rounded-full bg-white/20 px-4 py-1 text-xs font-semibold tracking-wide mb-6">
+            税理士・司法書士・社労士が今すぐ対応
+          </span>
+          <h1 className="text-4xl sm:text-5xl font-bold leading-tight mb-4">
+            専門家に、今すぐ<br />顔を見て相談できる
+          </h1>
+          <p className="text-lg text-white/80 mb-10">
+            予約不要・初回30分無料。待機中の専門家とビデオ通話で即つながる。
+          </p>
+          <form
+            onSubmit={(e) => { e.preventDefault(); goSearch(q); }}
+            className="mx-auto max-w-xl flex gap-2"
+          >
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="flex-1 rounded-xl px-5 py-3.5 text-sm text-zinc-900 outline-none shadow"
+              placeholder="悩みやキーワードで検索（例：相続、節税、会社設立）"
+            />
             <button
-              key={cat.slug}
-              onClick={() => router.push(`/experts?category=${cat.slug}`)}
-              className="rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-sm text-indigo-700 hover:bg-indigo-50"
+              type="submit"
+              className="rounded-xl bg-zinc-900 px-6 py-3.5 text-sm font-semibold text-white hover:bg-zinc-700 shadow"
             >
-              {cat.name}
+              検索
             </button>
-          ))}
+          </form>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            {MOCK_CATEGORIES.map((cat) => (
+              <button
+                key={cat.slug}
+                onClick={() => router.push(`/experts?category=${cat.slug}`)}
+                className="rounded-full bg-white/15 border border-white/30 px-3 py-1.5 text-xs text-white hover:bg-white/25"
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">今すぐ相談できる専門家</h2>
-          <button onClick={() => router.push('/experts')} className="text-sm text-indigo-600 hover:underline">すべて見る</button>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((e) => (
-            <ExpertCard key={e.id} expert={e} />
-          ))}
+      {/* 実績バー */}
+      <section className="border-b bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-6 grid grid-cols-3 divide-x text-center">
+          <div className="px-4">
+            <p className="text-2xl font-bold text-indigo-600">1,200+</p>
+            <p className="text-xs text-zinc-500 mt-0.5">登録専門家</p>
+          </div>
+          <div className="px-4">
+            <p className="text-2xl font-bold text-indigo-600">4.8</p>
+            <p className="text-xs text-zinc-500 mt-0.5">平均評価</p>
+          </div>
+          <div className="px-4">
+            <p className="text-2xl font-bold text-indigo-600">30秒</p>
+            <p className="text-xs text-zinc-500 mt-0.5">平均接続時間</p>
+          </div>
         </div>
       </section>
 
-      <section className="border-t pt-16">
-        <p className="text-xs font-semibold uppercase tracking-widest text-indigo-500 text-center mb-3">Why Samurai Connect</p>
-        <h2 className="text-3xl font-bold text-center text-zinc-900 mb-4">専門家相談を、もっとシンプルに</h2>
-        <p className="text-center text-zinc-400 text-sm mb-14">予約もメールも不要。今すぐ、顔を見て話せる。</p>
+      <main className="mx-auto max-w-6xl px-4 py-14 space-y-16">
 
-        <div className="grid sm:grid-cols-3 gap-px bg-zinc-100 rounded-2xl overflow-hidden border border-zinc-100">
-          <div className="bg-white px-8 py-10">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-xl mb-5">⚡</div>
-            <h3 className="font-semibold text-zinc-900 mb-2">即時接続</h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">待機中の専門家にワンクリックでつながる。予約も問い合わせも不要。</p>
+        {/* 専門家一覧 */}
+        <section>
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-zinc-900">今すぐ相談できる専門家</h2>
+              <p className="text-sm text-zinc-400 mt-0.5">待機中の専門家に今すぐビデオ通話で相談</p>
+            </div>
+            <button
+              onClick={() => router.push('/experts')}
+              className="text-sm font-medium text-indigo-600 hover:underline"
+            >
+              すべて見る
+            </button>
           </div>
-          <div className="bg-white px-8 py-10 border-l border-r border-zinc-100">
-            <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center text-xl mb-5">🎥</div>
-            <h3 className="font-semibold text-zinc-900 mb-2">ビデオで対面相談</h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">高画質ビデオ通話で、まるでオフィスに行ったような安心感。</p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.map((e) => (
+              <ExpertCard key={e.id} expert={e} />
+            ))}
           </div>
-          <div className="bg-white px-8 py-10">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-xl mb-5">🆓</div>
-            <h3 className="font-semibold text-zinc-900 mb-2">初回30分無料</h3>
-            <p className="text-sm text-zinc-400 leading-relaxed">費用ゼロで試せる。合えば継続、合わなければそれでOK。</p>
-          </div>
-        </div>
+        </section>
 
-        <div className="mt-10 text-center">
+        {/* 特徴 */}
+        <section>
+          <h2 className="text-xl font-bold text-zinc-900 mb-8 text-center">選ばれる3つの理由</h2>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {[
+              { num: "01", icon: "⚡", title: "予約不要・即つながる", desc: "待機中の専門家にワンクリックで即接続。問い合わせも不要。" },
+              { num: "02", icon: "🎥", title: "顔を見て安心相談", desc: "ビデオ通話で対面感覚。資料の画面共有もできる。" },
+              { num: "03", icon: "✅", title: "初回30分完全無料", desc: "費用ゼロでお試し。合えば継続、合わなければOK。" },
+            ].map((f) => (
+              <div key={f.num} className="rounded-2xl border border-zinc-100 bg-white p-7 shadow-sm hover:shadow-md transition">
+                <span className="text-xs font-bold text-indigo-400 tracking-widest">{f.num}</span>
+                <div className="text-3xl mt-3 mb-4">{f.icon}</div>
+                <h3 className="font-bold text-zinc-900 mb-2">{f.title}</h3>
+                <p className="text-sm text-zinc-400 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="rounded-2xl bg-zinc-900 text-white px-10 py-14 text-center">
+          <h2 className="text-2xl font-bold mb-3">今すぐ専門家に相談してみる</h2>
+          <p className="text-zinc-400 text-sm mb-8">予約不要・初回30分無料・すぐつながる</p>
           <button
             onClick={() => router.push('/experts')}
-            className="inline-flex items-center gap-2 rounded-xl bg-zinc-900 text-white font-medium px-7 py-3 text-sm hover:bg-zinc-700 transition"
+            className="rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-semibold px-10 py-3.5 text-sm shadow-lg transition"
           >
-            専門家を探してみる
+            専門家を探す
           </button>
-        </div>
-      </section>
-    </main>
+        </section>
+
+      </main>
+    </div>
   );
 }

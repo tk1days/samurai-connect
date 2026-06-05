@@ -121,7 +121,7 @@ export default function Home() {
         </div>
 
         <div className="mt-10 text-center">
-          
+          <a
             href="/experts"
             className="inline-block rounded-xl bg-indigo-600 px-8 py-3 text-sm font-medium text-white shadow hover:bg-indigo-700"
           >

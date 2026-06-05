@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Suspense } from "react";
@@ -19,46 +19,6 @@ type ExpertInfo = {
 
 function WaitRoom() {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const expertId = searchParams.get("expert");
-  const [now, setNow] = useState(Date.now());
-  const [roomUrl, setRoomUrl] = useState<string | null>(null);
-  const [expert, setExpert] = useState<ExpertInfo | null>(null);
-  const [showNameModal, setShowNameModal] = useState(false);
-  const [userName, setUserName] = useState("");
-  const startRef = useRef(Date.now());
-
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    if (!expertId) return;
-    supabase
-cat > /Users/watanabetakahiro/samurai-connect/src/app/wait/page.tsx << 'EOF'
-"use client";
-
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import { supabase } from "@/lib/supabase";
-import { Suspense } from "react";
-
-type ExpertInfo = {
-  display_name: string;
-  title: string;
-  license: string;
-  location: string;
-  rating: number;
-  review_count: number;
-  price_label: string;
-  gender: string;
-};
-
-function WaitRoom() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const expertId = searchParams.get("expert");
   const [now, setNow] = useState(Date.now());
   const [roomUrl, setRoomUrl] = useState<string | null>(null);
@@ -76,17 +36,7 @@ function WaitRoom() {
     if (!expertId) return;
     supabase
       .from("experts")
-      .select(`
-        room_url,
-        title,
-        license,
-        location,
-        rating,
-        review_count,
-        price_label,
-        gender,
-        profiles(display_name)
-      `)
+      .select("room_url, title, license, location, rating, review_count, price_label, gender, profiles(display_name)")
       .eq("id", expertId)
       .single()
       .then(({ data }) => {
@@ -125,7 +75,7 @@ function WaitRoom() {
 
   const joinRoom = () => {
     if (!userName.trim()) return;
-    const url = `${roomUrl}?t=${encodeURIComponent(userName)}`;
+    const url = roomUrl + "?t=" + encodeURIComponent(userName);
     window.open(url, "_blank");
     setShowNameModal(false);
   };
@@ -141,7 +91,7 @@ function WaitRoom() {
               autoFocus
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && joinRoom()}
+              onKeyDown={(e) => { if (e.key === "Enter") joinRoom(); }}
               placeholder="例：山田 太郎"
               className="w-full rounded-xl border px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-300"
             />
@@ -166,7 +116,7 @@ function WaitRoom() {
 
       <div className="mb-6 flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
-          <div className={`grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} font-bold text-white`}>
+          <div className={"grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br " + avatarGrad + " font-bold text-white"}>
             {expert?.display_name?.[0] ?? "？"}
           </div>
           <div>
@@ -179,8 +129,8 @@ function WaitRoom() {
             <p className="text-sm text-zinc-500">{expert?.title ?? ""}</p>
           </div>
         </div>
-        <div className={`text-2xl font-bold tabular-nums ${expired ? "text-red-500" : "text-indigo-600"}`}>
-          {expired ? "00:00" : `${mm}:${ss}`}
+        <div className={"text-2xl font-bold tabular-nums " + (expired ? "text-red-500" : "text-indigo-600")}>
+          {expired ? "00:00" : (mm + ":" + ss)}
         </div>
       </div>
 
@@ -226,7 +176,7 @@ function WaitRoom() {
             {expert?.price_label && <p className="font-medium text-indigo-600">{expert.price_label}</p>}
           </div>
           <Link
-            href={`/experts/${expertId}`}
+            href={"/experts/" + expertId}
             className="mt-4 block w-full rounded-xl border py-2 text-center text-sm hover:bg-gray-50"
           >
             プロフィールを見る

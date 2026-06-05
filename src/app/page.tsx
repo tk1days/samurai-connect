@@ -46,14 +46,8 @@ export default function Home() {
     <div className="bg-white">
 
       {/* ━━━ HERO ━━━ */}
-      <section className="relative overflow-hidden bg-[#0a0f1e] text-white min-h-[92vh] flex items-center">
-        {/* 背景グリッド */}
-        <div className="pointer-events-none absolute inset-0"
-          style={{
-            backgroundImage: "linear-gradient(rgba(99,102,241,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.07) 1px, transparent 1px)",
-            backgroundSize: "60px 60px"
-          }}
-        />
+      <section className="relative overflow-hidden text-white min-h-[88vh] flex items-center" style={{background: "linear-gradient(135deg, #1e3a5f 0%, #1e1b4b 50%, #2d1b69 100%)"}}>
+
         {/* グロー */}
         <div className="pointer-events-none absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full"
           style={{ background: "radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)" }}
@@ -62,7 +56,7 @@ export default function Home() {
           style={{ background: "radial-gradient(circle, rgba(168,85,247,0.12) 0%, transparent 70%)" }}
         />
 
-        <div className="relative mx-auto max-w-6xl px-4 py-20 w-full">
+        <div className="relative mx-auto max-w-6xl px-4 py-12 w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
 
             {/* 左：コピー */}
@@ -79,7 +73,7 @@ export default function Home() {
               <h1 className="text-5xl sm:text-6xl font-bold leading-[1.1] mb-6 tracking-tight">
                 税務・法律の悩み<br />
                 <span style={{
-                  background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #f472b6 100%)",
+                  background: "linear-gradient(135deg, #fbbf24 0%, #f9a8d4 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent"
                 }}>今すぐ、顔を見て</span><br />
@@ -165,7 +159,7 @@ export default function Home() {
       </section>
 
       {/* ━━━ 実績バー ━━━ */}
-      <section className="bg-zinc-950 border-y border-white/5">
+      <section className="bg-indigo-900 border-y border-indigo-800">
         <div className="mx-auto max-w-6xl px-4 py-6 grid grid-cols-3 divide-x divide-white/10 text-center">
           {[
             { val: "1,200+", label: "登録専門家" },

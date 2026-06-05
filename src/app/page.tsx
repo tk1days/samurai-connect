@@ -125,7 +125,7 @@ export default function Home() {
             href="/experts"
             className="inline-block rounded-xl bg-indigo-600 px-8 py-3 text-sm font-medium text-white shadow hover:bg-indigo-700"
           >
-            専門家を探してみる →
+            専門家を探してみる
           </a>
         </div>
       </section>

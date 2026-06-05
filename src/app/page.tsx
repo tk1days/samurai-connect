@@ -43,7 +43,7 @@ export default function Home() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                className="flex-1 rounded-xl px-5 py-3.5 text-sm text-zinc-900 outline-none shadow"
+                className="flex-1 rounded-xl px-5 py-3.5 text-sm text-zinc-900 outline-none shadow bg-white border-0"
                 placeholder="例：相続、節税、会社設立…"
               />
               <button
@@ -131,8 +131,8 @@ export default function Home() {
           <p className="text-sm text-zinc-400 text-center mb-10">面倒な手続きなし。今すぐ始められる。</p>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
-              { num: "01", icon: "⚡", title: "予約不要・即つながる", desc: "待機中の専門家にワンクリックで即接続。問い合わせも不要。", img: "https://images.unsplash.com/photo-1553484771-047a44eee27b?w=400&auto=format&fit=crop&q=80" },
-              { num: "02", icon: "🎥", title: "顔を見て安心相談", desc: "ビデオ通話で対面感覚。資料の画面共有もできる。", img: "https://images.unsplash.com/photo-1609921212029-bb5a28e60960?w=400&auto=format&fit=crop&q=80" },
+              { num: "01", icon: "⚡", title: "予約不要・即つながる", desc: "待機中の専門家にワンクリックで即接続。問い合わせも不要。", img: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&auto=format&fit=crop&q=80" },
+              { num: "02", icon: "🎥", title: "顔を見て安心相談", desc: "ビデオ通話で対面感覚。資料の画面共有もできる。", img: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=400&auto=format&fit=crop&q=80" },
               { num: "03", icon: "✅", title: "初回30分完全無料", desc: "費用ゼロでお試し。合えば継続、合わなければOK。", img: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&auto=format&fit=crop&q=80" },
             ].map((f) => (
               <div key={f.num} className="rounded-2xl overflow-hidden border border-zinc-100 bg-white shadow-sm hover:shadow-md transition">
@@ -152,11 +152,11 @@ export default function Home() {
         {/* CTA */}
         <section className="rounded-2xl overflow-hidden relative">
           <img
-            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1200&auto=format&fit=crop&q=80"
+            src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=1200&auto=format&fit=crop&q=80"
             alt="専門家に相談"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-zinc-900/70" />
+          <div className="absolute inset-0 bg-indigo-900/75" />
           <div className="relative text-white px-10 py-16 text-center">
             <h2 className="text-2xl font-bold mb-3">今すぐ専門家に相談してみる</h2>
             <p className="text-zinc-300 text-sm mb-8">予約不要・初回30分無料・すぐつながる</p>

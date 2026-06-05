@@ -3,9 +3,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { MOCK_EXPERTS } from "@/lib/mock";
 import { supabase } from "@/lib/supabase";
 import { Suspense } from "react";
+
+type ExpertInfo = {
+  display_name: string;
+  title: string;
+  license: string;
+  location: string;
+  rating: number;
+  review_count: number;
+  price_label: string;
+  gender: string;
+};
 
 function WaitRoom() {
   const searchParams = useSearchParams();
@@ -13,6 +23,46 @@ function WaitRoom() {
   const expertId = searchParams.get("expert");
   const [now, setNow] = useState(Date.now());
   const [roomUrl, setRoomUrl] = useState<string | null>(null);
+  const [expert, setExpert] = useState<ExpertInfo | null>(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [userName, setUserName] = useState("");
+  const startRef = useRef(Date.now());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    if (!expertId) return;
+    supabase
+cat > /Users/watanabetakahiro/samurai-connect/src/app/wait/page.tsx << 'EOF'
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { Suspense } from "react";
+
+type ExpertInfo = {
+  display_name: string;
+  title: string;
+  license: string;
+  location: string;
+  rating: number;
+  review_count: number;
+  price_label: string;
+  gender: string;
+};
+
+function WaitRoom() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const expertId = searchParams.get("expert");
+  const [now, setNow] = useState(Date.now());
+  const [roomUrl, setRoomUrl] = useState<string | null>(null);
+  const [expert, setExpert] = useState<ExpertInfo | null>(null);
   const [showNameModal, setShowNameModal] = useState(false);
   const [userName, setUserName] = useState("");
   const startRef = useRef(Date.now());
@@ -26,18 +76,35 @@ function WaitRoom() {
     if (!expertId) return;
     supabase
       .from("experts")
-      .select("room_url")
+      .select(`
+        room_url,
+        title,
+        license,
+        location,
+        rating,
+        review_count,
+        price_label,
+        gender,
+        profiles(display_name)
+      `)
       .eq("id", expertId)
       .single()
       .then(({ data }) => {
         if (data?.room_url) setRoomUrl(data.room_url);
+        if (data) {
+          setExpert({
+            display_name: (data.profiles as any)?.display_name ?? "専門家",
+            title: data.title ?? "",
+            license: data.license ?? "",
+            location: data.location ?? "",
+            rating: data.rating ?? 0,
+            review_count: data.review_count ?? 0,
+            price_label: data.price_label ?? "",
+            gender: data.gender ?? "male",
+          });
+        }
       });
   }, [expertId]);
-
-  const expert = useMemo(
-    () => expertId ? MOCK_EXPERTS.find((e) => e.id === expertId) : MOCK_EXPERTS[0],
-    [expertId]
-  );
 
   const remainSec = Math.max(0, 180 - Math.floor((now - startRef.current) / 1000));
   const expired = remainSec === 0;
@@ -100,16 +167,16 @@ function WaitRoom() {
       <div className="mb-6 flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <div className={`grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br ${avatarGrad} font-bold text-white`}>
-            {expert?.display_name[0]}
+            {expert?.display_name?.[0] ?? "？"}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-semibold">{expert?.display_name}</span>
+              <span className="font-semibold">{expert?.display_name ?? "読み込み中..."}</span>
               <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
                 {expired ? "期限切れ" : "呼び出し中…"}
               </span>
             </div>
-            <p className="text-sm text-zinc-500">{expert?.title}</p>
+            <p className="text-sm text-zinc-500">{expert?.title ?? ""}</p>
           </div>
         </div>
         <div className={`text-2xl font-bold tabular-nums ${expired ? "text-red-500" : "text-indigo-600"}`}>
@@ -151,15 +218,15 @@ function WaitRoom() {
         <div className="rounded-2xl border bg-white p-4 shadow-sm">
           <h3 className="font-semibold">相手の専門家</h3>
           <div className="mt-3 space-y-2 text-sm text-zinc-600">
-            <p className="font-medium text-zinc-900">{expert?.display_name}</p>
-            <p>{expert?.license}</p>
-            <p>{expert?.title}</p>
-            <p>📍 {expert?.location}</p>
-            <p>⭐ {expert?.rating.toFixed(1)} ({expert?.review_count}件)</p>
-            <p className="font-medium text-indigo-600">{expert?.price_label}</p>
+            <p className="font-medium text-zinc-900">{expert?.display_name ?? "―"}</p>
+            <p>{expert?.license ?? "―"}</p>
+            <p>{expert?.title ?? "―"}</p>
+            {expert?.location && <p>📍 {expert.location}</p>}
+            {expert && <p>⭐ {expert.rating.toFixed(1)} ({expert.review_count}件)</p>}
+            {expert?.price_label && <p className="font-medium text-indigo-600">{expert.price_label}</p>}
           </div>
           <Link
-            href={`/experts/${expert?.id}`}
+            href={`/experts/${expertId}`}
             className="mt-4 block w-full rounded-xl border py-2 text-center text-sm hover:bg-gray-50"
           >
             プロフィールを見る

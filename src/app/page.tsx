@@ -41,7 +41,7 @@ export default function Home() {
     }}>
 
       {/* ━━━ HERO ━━━ */}
-      <section style={{ padding: "86px 0 60px", position: "relative", overflow: "hidden" }}>
+      <section style={{ padding: "56px 0 40px", position: "relative", overflow: "hidden" }}>
         {/* 背景グロー */}
         <div style={{
           position: "absolute", width: 460, height: 460, borderRadius: "50%",
@@ -186,7 +186,7 @@ export default function Home() {
 
           {/* 実績バー */}
           <div style={{
-            marginTop: 64, padding: "20px 40px",
+            marginTop: 32, padding: "20px 40px",
             background: "rgba(255,255,255,.75)", border: "1px solid rgba(20,24,39,.07)",
             borderRadius: 22, boxShadow: "0 10px 35px rgba(39,48,90,.07)",
             backdropFilter: "blur(18px)",
@@ -207,7 +207,7 @@ export default function Home() {
       </section>
 
       {/* ━━━ 専門家一覧 ━━━ */}
-      <section style={{ padding: "80px 0" }}>
+      <section style={{ padding: "52px 0" }}>
         <div className="mx-auto px-5" style={{ maxWidth: 1180 }}>
           <div className="flex items-end justify-between mb-10">
             <div>
@@ -231,9 +231,9 @@ export default function Home() {
       </section>
 
       {/* ━━━ How it works ━━━ */}
-      <section style={{ padding: "80px 0", background: "rgba(255,255,255,.5)" }}>
+      <section style={{ padding: "52px 0", background: "rgba(255,255,255,.5)" }}>
         <div className="mx-auto px-5" style={{ maxWidth: 1180 }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: "#5b4bff", letterSpacing: ".1em", textTransform: "uppercase", marginBottom: 12 }}>
               How it works
             </div>
@@ -267,9 +267,9 @@ export default function Home() {
       </section>
 
       {/* ━━━ CTA ━━━ */}
-      <section style={{ padding: "80px 20px" }}>
+      <section style={{ padding: "52px 20px" }}>
         <div style={{
-          maxWidth: 1180, margin: "0 auto", padding: "64px 40px",
+          maxWidth: 1180, margin: "0 auto", padding: "48px 40px",
           borderRadius: 28, textAlign: "center",
           background: "linear-gradient(135deg,#5b4bff 0%,#2563eb 60%,#14b8a6 100%)",
           boxShadow: "0 24px 60px rgba(79,70,229,.30)",
